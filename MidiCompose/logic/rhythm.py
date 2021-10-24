@@ -8,7 +8,9 @@ from numpy.typing import ArrayLike
 
 class TimeUnit:
     """
-    Subdivision(state: Union[0,1,2])
+    Contains the state of a subdivision within a Beat.
+
+    State can be 1 (attack), 2 (sustain), or 0 (release).
     """
 
     def __init__(self,
@@ -68,14 +70,13 @@ class BeatIterator:
 # TODO: include TimeUnit ordering rules in Beat._validate()
 class Beat:
     """
-    Container for TimeUnits. Subdivision attribute determines number of
-    TimeUnits.
+    Container for TimeUnit objects.
 
-    Argument `beat` must either be a single integer representing the
-    number of subdivisions, or an iterable of TimeUnit or TimeUnit-compatible
-    integers (ie. {0,1,2}). The latter is useful when passing stateful TimeUnits.
+    Definitive attribute is `self.beats`, which is a numpy array containing TimeUnit objects.
 
-    Beat(subdivision=4,time_units: array)
+    Argument `beat` must either be a single integer representing the number of
+    subdivisions, or an iterable containing TimeUnit objects and/or "TimeUnit-like"
+    integers (ie. {0,1,2}). The latter is useful when passing stateful TimeUnit objects.
     """
 
     def __init__(self,
@@ -97,6 +98,7 @@ class Beat:
         number of subdivisions, or an iterable of TimeUnit or TimeUnit-compatible
         integers (ie. {0,1,2}).
         """
+
         # if integer, `beat` represents number of subdivisions
         if isinstance(beat, int):
             self.subdivision = beat
@@ -107,7 +109,7 @@ class Beat:
             beat_set = set([type(a) for a in beat])
             valid = {int, TimeUnit}
             if not beat_set.issubset(valid):
-                msg = "If giving an iterable for `beat`, each element must either be an" \
+                msg = "If giving an iterable for `beat`, each element must either be an " \
                       "integer in {0,1,2} or a TimeUnit object"
                 raise TypeError(msg)
             if beat_set == {TimeUnit}:
@@ -138,6 +140,16 @@ class Beat:
 
     def set_verbosity(self, verbose: bool):
         self.verbose = verbose
+
+    def is_active(self) -> bool:
+        """
+        Returns True if any TimeUnit instances contain active state (1 or 2).
+        Otherwise, returns False.
+        """
+        if self.time_units.all() == 0:
+            return False
+        else:
+            return True
 
     def __repr__(self):
         r = f"Beat(subdivision={self.subdivision}"
@@ -181,48 +193,80 @@ class Measure:
     """
     Container for Beats.
 
-    Two options for initialization:
-    1) Supply `n_beats` AND `subdivision`. Will fill the Measure with `inactive` beats.
-    2) Supply an iterable of Beat objects
+    Three options for initialization:
+    1) Supply iterable of Beat object. This is useful if passing Beats with pre-defined state.
+    2) Supply an iterable integers, where the number of items represents the number of beats,
+    and the values of the integers represents the respective subdivision of each beat.
+    3) Combination of the previous two.
+
+    Note that passing an integer will automatically instantiate an "empty" beat. That is,
+    all TimeUnit objects will be set to 0 within that beat.
     """
 
     def __init__(self,
-                 n_beats: Optional[int] = None,
-                 subdivision: Optional[int] = None,
-                 beats: Optional[Iterable[Beat]] = None,
+                 beats: Union[Iterable[Beat],Iterable[int]],
                  verbose: bool = False):
+        """
+        Three options for initialization:
+        1) Supply iterable of Beat object. This is useful if passing Beats with pre-defined state.
+        2) Supply an iterable integers, where the number of items represents the number of beats,
+        and the values of the integers represents the respective subdivision of each beat.
+        3) Combination of the previous two.
 
-        self._parse_arg(n_beats, subdivision, beats)
+        Note that passing an integer will automatically instantiate an "empty" beat. That is,
+        all TimeUnit objects will be set to 0 within that beat.
+
+        :param beats: iterable containing Beat objects, bare integers, or a combination of the two.
+        :param verbose: if True, __repr__ gives more info.
+        """
+
+        self._parse_arg(beats)
 
         self.beats: ArrayLike[Beat]
         self.n_beats: int
 
         self.verbose: bool = False
 
-    def _parse_arg(self, n_beats, subdivision, beats):
+    def _parse_arg(self, beats):
 
-        if beats is not None:
+        arg_set = set([type(a) for a in beats])
 
-            arg_set = {n_beats,subdivision}
-            if not arg_set.issubset({None}):
-                msg = "Arguments given for both `beats` and [`n_beats` and/or `subdivision`]."
-                raise AttributeError(msg)
-            else:
-                if not set([type(b) for b in beats]).issubset({Beat}):
-                    msg = "Argument `beats` must only consist of Beat objects."
-                    raise TypeError(msg)
+        beat_set = {Beat}
+        int_set = {int}
+        mixed_set = {Beat,int}
+
+        # validate type-set of `beats` arg
+        if arg_set.isdisjoint(mixed_set):
+            msg = "Argument `beats` must be an iterable containing only integers and/or " \
+                  "Beat objects."
+            raise AttributeError(msg)
+
+        # contains only Beats -- no validation needed
+        elif arg_set.issubset(beat_set):
+            self.beats = np.array(beats)
+            self.n_beats = self.beats.size
+
+        # contains only integers -- validated by Beat constructor
+        elif arg_set.issubset(int_set):
+            self.beats = np.array([Beat(a) for a in beats])
+            self.n_beats = self.beats.size
+
+        # contains mixture Beat and int -- validated by Beat constructor
+        else:
+            _beats = []
+            for b in beats:
+                if type(b) == int:
+                    _beats.append(Beat(b))
                 else:
-                    self.beats = np.array(beats)
-                    self.n_beats = self.beats.size
+                    _beats.append(b)
+            self.beats = np.array(_beats)
+            self.n_beats = self.n_beats.size
 
-        elif beats is None:
-            if any([n_beats, subdivision]) is None:
-                msg = "If `beats` is not given, then both `n_beats` AND `subdivision` are required."
-                raise AttributeError(msg)
 
-            else:  # infer n_beats and subdivision
-                self.n_beats = n_beats
-                self.beats = np.array(Beat(subdivision) * 4)
+        # validate arg types
+        if not arg_set.issubset(mixed_set):
+            msg = "Argument `beats` must be an iterable containing Beat objects and/or itegers."
+            raise AttributeError(msg)
 
     #### ACTIVATION FUNCTIONS ####
     def __iter__(self):

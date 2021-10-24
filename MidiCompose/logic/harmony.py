@@ -1,59 +1,69 @@
-"""
-Interval as purely descriptive. Not tied to absolute notes, values but must be derived
-from two notes.
-
-Represents the distance (non-directional) between two notes.
-
-Requirements:
-    - Always assumes ascending (no such thing as "M3 below", for example)
-    - To initialize, must be given either:
-        - hs
-        - quality AND value (AND octave_shift if applicable)
-"""
 from dataclasses import dataclass
 from typing import Optional, Union, Literal
 
 from icecream import ic
 
-import CONSTANTS as C
+from MidiCompose.logic import CONSTANTS as C
 
-
-# TODO: include translator for string representation (register and non-register)
-# TODO: include optional `tonality` parameter to inform string representations based on key (Bb vs A#)
-# TODO: implement _update_attributes() for when and attribute is set manually or by operation
+# TODO : string representation (mappers.py)
 class Note:
     """
-    Used mostly for validation and translating between note representation in other classes.
+    Represents a midi-note.
+    - `value` is the midi-compatible attribute (integer between 0-127).
     """
 
-    def __init__(self, note: int, verbose: bool = False):
+    def __init__(self, note: Union[int,str], verbose: bool = False):
+        """
+        Parameter `note` can take one of two options:
+            1) An integer between 0-127
+            2) the string representation of a note. Note that if a string is passed, it
+               must either be accompanied by the register of the note (ie. "Eb4" represents
+               Eb in the fourth octave).
 
-        # valid representations
-        self.value: Optional[int] = None
+        :param note:
+        :param verbose:
+        """
+
+        self._parse_arg(note)
+
+        self.value: int
+
         self.letter_oct: Optional[str] = None
-
         self.letter: Optional[str] = None
 
-        self.verbose = verbose
-        self._parse_input(note)
+        self.verbose: bool = verbose
 
-    def _parse_input(self, note):
-        if not isinstance(note, int):
-            msg = "Midi-value notes must be an integer."
+    def _parse_arg(self,note):
+
+        valid_type_set = {int,str}
+        if type(note) not in valid_type_set:
+            msg = "Parameter `note` must either be an integer between 0-127, or a valid" \
+                  "string representation of a note."
             raise TypeError(msg)
 
-        elif note not in range(128):
-            msg = "Midi-value notes must be an integer between 0-127"
-            raise ValueError(msg)
+        elif type(note) == int:
+            if note not in range(128):
+                msg = "If `note` is given as an integer, must be between 0-127."
+                raise ValueError(msg)
+            else:
+                self.value = note
 
-        self.value = note
+        elif type(note) == str:
+            pass
 
     #### SPECIAL METHODS ####
     def __eq__(self, other):
-        if self.value == other.value:
-            return True
+        if type(other) == int:
+            if self.value == other:
+                return True
+            else:
+                return False
         else:
-            return False
+            if self.value == other.value:
+                return True
+            else:
+                return False
+
 
     def __lt__(self, other):
         if self.value < other.value:
@@ -98,7 +108,6 @@ class Note:
     def __repr__(self):
         if self.verbose:
             r = "set up verbose repr!!"
-            pass
         else:
             r = f"MidiNote({self.value})"
 
@@ -106,13 +115,23 @@ class Note:
 
 class Interval:
     """
-    Constructor takes only one required argument:
-        - number of half steps (int) -- 16
-        OR
-        - string representation -- "M3+"
+    The distance between two notes.
+
+    Can be uniquely identified by:
+        - `hs`: number of halfsteps
+        - `string`: string representation...eg] "M3+" -> "major third up an octave" -> 16 half-steps
+
+    Either of the unique representations can be supplied as an argument to the constructor.
     """
 
     def __init__(self, interval: Union[int, str], verbose: bool = True):
+        """
+
+        :param interval: Takes one of two options:
+                            1) number of half steps (integer)
+                            2) string representation...eg] "M3", "P5+", etc.
+        :param verbose: If True, __repr__ gives more info.
+        """
 
         # full representations
         self.hs: Optional[int] = None
@@ -208,11 +227,12 @@ class Interval:
     #### UTILITY METHODS ####
     def above(self, note: Union[Note, int, str]) -> Note:
         """
-        Given a valid note representation, return the note above said note.
-        :param note:
-        :return: MidiNote
+        Given a valid note representation, return a Note object at the appropriate interval.
+
+        :param note: Note object or valid "Note-like" representation.
+        :return: Note object at the appropriate interval.
         """
-        # coerce to MidiNote object
+        # coerce to Note object
         if not isinstance(note, Note):
             try:
                 note = Note(note)
@@ -225,8 +245,14 @@ class Interval:
         return Note(result_value)
 
     def below(self, note:Union[Note, int, str]) -> Note:
+        """
+        Given a valid note representation, return a Note object at the appropriate interval.
 
-        # coerce to MidiNote object
+        :param note: Note object or valid "Note-like" representation.
+        :return: Note object at the appropriate interval.
+        """
+
+        # coerce to Note object
         if not isinstance(note, Note):
             try:
                 note = Note(note)

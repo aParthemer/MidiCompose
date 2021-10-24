@@ -5,13 +5,13 @@ import pytest
 import numpy as np
 from icecream import ic
 
-from MidiCompose.logic import rhythm as r
+from MidiCompose.logic.rhythm import TimeUnit,Beat,Measure
 
 
 #### TimeUnit ####
 
 def test_TimeUnit_constructor():
-    tu = r.TimeUnit()
+    tu = TimeUnit()
     assert tu.state == 0
 
     tu.activate()
@@ -26,42 +26,41 @@ def test_TimeUnit_constructor():
     with pytest.raises(TypeError):
         invalid = ["1", 1.1]
 
-        [r.TimeUnit(a) for a in invalid]
+        [TimeUnit(a) for a in invalid]
 
     with pytest.raises(ValueError):
         invalid = [-1, 3]
-        [r.TimeUnit(a) for a in invalid]
+        [TimeUnit(a) for a in invalid]
 
 
 #### Beat ####
 
 def test_Beat_constructor_given_subdivision():
-    b = r.Beat(4)
+    b = Beat(4)
 
     assert b.subdivision == 4
     assert type(b.time_units) == np.ndarray
     assert b.time_units.ndim == 1
 
-    time_units = list(b.time_units)
-    for tu in time_units:
-        assert type(tu) == r.TimeUnit
-        assert tu.state == 0
+    # all TimeUnit instances have `state` == 0
+    assert set([tu.state for tu in b.time_units]).issubset({0})
 
     with pytest.raises(TypeError):
-        b = r.Beat("1")
+        Beat("1")
     with pytest.raises(ValueError):
         invalid = [0, -1]
-        [r.Beat(a) for a in invalid]
-
+        [Beat(a) for a in invalid]
 
 def test_Beat_constructor_given_iterable():
-    b = r.Beat([1, 0, 1, 2])
+    b = Beat([1, 0, 1, 2])
 
     assert b.subdivision == 4
     assert type(b.time_units) == np.ndarray
     assert b.time_units.ndim == 1
+    assert b[0].state == 1
+    assert b[-1].state == 2
 
-    b = r.Beat([r.TimeUnit(0), 1, 2])
+    b = Beat([TimeUnit(0), 1, 2])
 
     assert b.subdivision == 3
     assert type(b.time_units) == np.ndarray
@@ -72,97 +71,96 @@ def test_Beat_constructor_given_iterable():
             "1012",
             [1, 0, "1", 2]
         ]
-        [r.Beat(a) for a in invalid]
+        [Beat(a) for a in invalid]
 
     with pytest.raises(ValueError):
         invalid = [
             [1,2,3],
             [0,-1]
         ]
-        [r.Beat(a) for a in invalid]
+        [Beat(a) for a in invalid]
 
 def test_Beat_iterator():
-    b = r.Beat(4)
+    b = Beat(4)
 
     for tu in b:
-        assert type(tu) == r.TimeUnit
+        assert type(tu) == TimeUnit
 
 def test_Beat_indexing():
-    b = r.Beat([0,1,2,0])
-    assert type(b[0]) == r.TimeUnit
+    b = Beat([0,1,2,0])
+    assert type(b[0]) == TimeUnit
     assert b[3].state == 0
 
 def test_Beat_mul():
 
-    b = r.Beat([1,2,0])
+    b = Beat([1,2,0])
     beats = b * 2
 
     for b_copy in beats:
         assert b_copy.subdivision == 3
-        assert type(b_copy[0]) == r.TimeUnit
+        assert type(b_copy[0]) == TimeUnit
         assert b_copy[0].state == 1
 
 
 #### Measure ####
 
-def test_Measure_constructor_given_nbeats_and_subdivision():
-    kwargs = {
-        "n_beats":4,
-        "subdivision":4
-    }
+def test_Measure_constructor():
 
-    m = r.Measure(**kwargs)
-    assert m.n_beats == 4
+    # given Beat instances
+    beats = [Beat(4),Beat([1,1,1])]
+    m = Measure(beats=beats)
     assert type(m.beats) == np.ndarray
-    assert m.beats.size == 4
-
-
-def test_Measure_constructor_given_Beats():
-    beats = [r.Beat(4),r.Beat([1,1,1])]
-    m = r.Measure(beats=beats)
     assert m.n_beats == 2
-
     assert m.beats[0].subdivision == 4
     assert m.beats[0][0].state == 0
-
     assert m.beats[1].subdivision == 3
     assert m.beats[1][0].state == 1
 
+    # given integers
+    beats = [4, 4, 3]
+    m = Measure(beats=beats)
+    assert type(m.beats) == np.ndarray
+    assert m.n_beats == 3
+    assert m.beats[0].subdivision == 4
+    assert m.beats[0][0].state == 0
+    assert m.beats[1].subdivision == 4
 
+    # given mixture
+    beats = (
+        4,Beat(4),Beat([1,0,1,2]),5
+    )
+
+
+
+
+
+
+
+def test_Measure_constructor_given_mixture():
+
+    # beats = (4,Beat,5)
+    # Measure(beats)
+    pass
+
+# TODO
 def test_Measure_constructor_fails():
-
-    attribute_kwargs = [
-        {"n_beats": 4, "subdivision": 4, "beats": r.Beat() * 4},
-        {"n_beats": 4, "beats": r.Beat() * 4},
-    ]
-    b = r.Beat([1,2,0,1])
-    for k in attribute_kwargs:
-        with pytest.raises(AttributeError):
-            r.Measure(**k)
-
-    type_kwargs = [
-        {"n_beats":4,"subdivision":"4"},
-        {"beats":[1,2,3]}
-    ]
-    for k in type_kwargs:
-        with pytest.raises(TypeError):
-            r.Measure(**k)
+    pass
 
 
 def test_Measure_iterator():
-    measure = r.Measure(beats=[
-        r.Beat(3),
-        r.Beat([1,1,0]),
-        r.Beat(4)
+    measure = Measure(beats=[
+        Beat(3),
+        Beat([1,1,0]),
+        Beat(4)
     ])
     for beat in measure:
-        assert type(beat) == r.Beat
+        assert type(beat) == Beat
 
 def test_Measure_indexing():
-    measure = r.Measure(beats=[
-        r.Beat(3),
-        r.Beat([1, 1, 0]),
-        r.Beat(4)
+    measure = Measure(beats=[
+        Beat(3),
+        Beat([1, 1, 0]),
+        Beat(4)
     ])
     assert measure[0].subdivision == 3
 

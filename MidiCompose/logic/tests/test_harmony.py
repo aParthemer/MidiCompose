@@ -1,14 +1,25 @@
 import pytest
 
-from MidiCompose.logic.harmony import Interval
+from MidiCompose.logic.harmony import Note,Interval
 
 #### NOTE ####
+def test_note_constructor():
 
+    n = Note(60)
+    assert n.value == 60
+
+    notes_invalid_type = [1.1]
+    with pytest.raises(TypeError):
+        [Note(n) for n in notes_invalid_type]
+
+    # notes_out_of_range = [-1,128]
+    with pytest.raises(ValueError):
+        Note(-1)
 
 #### INTERVAL ####
 
-# constructor takes half steps
-def test_constructor_hs():
+
+def test_Interval_constructor_hs():
     interval = Interval(3)
     assert interval.hs == 3
     assert interval.string == "m3"
@@ -29,8 +40,7 @@ def test_constructor_hs():
         for n in out_of_range:
             interval = Interval(n)
 
-# constructor takes string representation
-def test_constructor_string():
+def test_Interval_constructor_string():
 
     interval = Interval("P4")
     assert interval.string == "P4"
@@ -50,10 +60,22 @@ def test_constructor_string():
         invalid_strings = ["A","Bb","U-","P5-"]
         [Interval(s) for s in invalid_strings]
 
-def test_above():
+def test_Interval_above_and_below():
+    """
+    Supports comparison between integers AND other Note objects.
+    """
+
+    # pass an integer
     note = 60
     assert Interval("M3").above(note) == 64
-
-def test_below():
-    note = 60
+    assert Interval("M3").above(note) == Note(64)
     assert Interval("M3").below(note) == 56
+    assert Interval("M3").below(note) == Note(56)
+
+    # pass Note object
+    note = Note(60)
+    assert Interval("P4").above(note) == 65
+    assert Interval("P4").above(note) == Note(65)
+    assert Interval("P4").below(note) == 55
+    assert Interval("P4").below(note) == Note(55)
+
