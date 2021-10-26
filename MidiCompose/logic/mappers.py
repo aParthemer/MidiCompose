@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 """
 Midi-range: (C-2,G8) : (0,127)
-Piano-range: (A0,C8) : (21,
+Piano-range: (A0,C8) : (21,120)
 """
 
 # TODO

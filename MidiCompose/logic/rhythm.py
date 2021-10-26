@@ -1,4 +1,4 @@
-from typing import Optional, Iterable, Any, Union, Tuple, List
+from typing import Optional, Iterable, Any, Union, Tuple, List, Collection
 import copy
 
 import numpy as np
@@ -8,17 +8,17 @@ from numpy.typing import ArrayLike
 
 class TimeUnit:
     """
-    Contains the state of a subdivision within a Beat.
+    Contains the time_units of a subdivision within a Beat.
 
     State can be 1 (attack), 2 (sustain), or 0 (release).
     """
 
     def __init__(self,
-                 state: Optional[int] = 0,
+                 state: int = 0,
                  verbose: bool = False):
 
         # definitive attribute
-        self.state: Optional[int] = state
+        self.state: int = state
         self._validate()
 
         # __repr__ verbosity
@@ -26,10 +26,10 @@ class TimeUnit:
 
     def _validate(self):
         if not isinstance(self.state, int):
-            msg = "`state` must be an integer."
+            msg = "`time_units` must be an integer."
             raise TypeError(msg)
         if self.state not in {0, 1, 2}:
-            msg = "`state` can only be either 0, 1, or 2."
+            msg = "`time_units` can only be either 0, 1, or 2."
             raise ValueError(msg)
 
     def activate(self):
@@ -44,12 +44,22 @@ class TimeUnit:
     def set_verbose(self, verbose: bool):
         self.verbose = verbose
 
+    def __eq__(self, other):
+        if type(other) == int:
+            return self.state == other
+        else:
+            return self.state == other.time_units
+
+    def __int__(self):
+        return int(self.state)
+
     def __repr__(self):
         if self.verbose:
-            r = f"TimeUnit(state={self.state})"
+            r = f"TimeUnit(time_units={self.state})"
         else:
             r = str(self.state)
         return r
+
 
 class BeatIterator:
 
@@ -67,12 +77,13 @@ class BeatIterator:
         else:
             raise StopIteration
 
+
 # TODO: include TimeUnit ordering rules in Beat._validate()
 class Beat:
     """
     Container for TimeUnit objects.
 
-    Definitive attribute is `self.beats`, which is a numpy array containing TimeUnit objects.
+    Definitive attribute is `self.time_units`, which is a numpy array containing TimeUnit objects.
 
     Argument `beat` must either be a single integer representing the number of
     subdivisions, or an iterable containing TimeUnit objects and/or "TimeUnit-like"
@@ -82,11 +93,13 @@ class Beat:
     def __init__(self,
                  beat: Union[int, Iterable[Union[int, TimeUnit]]] = 1,
                  verbose: bool = False):
+        """
+        :param verbose: determines format of output
+        """
 
         self._parse_beat_arg(beat)
 
         self.time_units: ArrayLike[TimeUnit]
-        self.subdivision: int
 
         self.verbose = verbose
 
@@ -101,8 +114,8 @@ class Beat:
 
         # if integer, `beat` represents number of subdivisions
         if isinstance(beat, int):
-            self.subdivision = beat
-            self._init_time_units()
+            self.time_units = np.array([TimeUnit() for _ in range(beat)])
+            self.state = self.time_units
 
         # else, `beat` represents iterable of TimeUnit-like objects
         else:
@@ -123,7 +136,7 @@ class Beat:
                         tu = TimeUnit(item)
                         time_units.append(tu)
             self.time_units = np.array(time_units)
-            self.subdivision = self.time_units.size
+            self.state = self.time_units
 
     def _validate(self):
 
@@ -132,47 +145,92 @@ class Beat:
             msg = "`subdivision` must be >= 1."
             raise ValueError(msg)
 
-    def _init_time_units(self):
-        """
-        Initializes deactivated TimeUnit objects based on subdivision.
-        """
-        self.time_units = np.array([TimeUnit() for _ in range(self.subdivision)])
+    @property
+    def subdivision(self) -> int:
+        return self.time_units.size
 
-    def set_verbosity(self, verbose: bool):
-        self.verbose = verbose
+    @property
+    def state(self) -> np.ndarray:
+        """
+        1d numeric array representing the state of each TimeUnit in the Beat.
+        """
+        return self._state
 
+    @state.setter
+    def state(self,value):
+        self._state = np.array([int(n) for n in value])
+
+    @property
     def is_active(self) -> bool:
         """
-        Returns True if any TimeUnit instances contain active state (1 or 2).
+        Returns True if any TimeUnit instances contain active time_units (1 or 2).
         Otherwise, returns False.
         """
-        if self.time_units.all() == 0:
+        if self.state.all() == 0:
             return False
         else:
             return True
 
-    def __repr__(self):
-        r = f"Beat(subdivision={self.subdivision}"
-        if self.verbose:
-            tus = []
-            for tu in self.time_units:
-                tu.set_verbose(False)
-                tus.append(tu)
-            r += f",\n     time_units={str(tus)}"
-        r += ")"
-        return r
+    #### UTILITY FUNCTIONS ####
+
+    def set_state(self,
+                  state: Collection[int],
+                  override: bool = False):
+        """
+        Set the time_units of the TimeUnit instances to either 0,1 or 2.
+
+        :param state: Collection of integers
+        :param override: If False, error will be raised if setting time_units to an already active
+        """
+
+        # validation
+        if not override:
+            if self.is_active:
+                msg = "Cannot set time_units to an already active beat. If you wish to override" \
+                      "the current time_units, set argument `override` to True."
+                raise AttributeError(msg)
+
+        valid_set = {0, 1, 2}
+        valid_len = self.subdivision
+        if len(state) != valid_len:
+            msg = "The collection passed to argument `time_units` must have the same number" \
+                  "of elements as the number of subdivisions in the Beat."
+            raise ValueError(msg)
+        elif not set(state).issubset(valid_set):
+            msg = "`time_units` can only take a collection containing {0,1,2}"
+            raise ValueError(msg)
+
+        self.state = state
 
     def __iter__(self):
         return BeatIterator(self)
 
     def __getitem__(self, item) -> TimeUnit:
-        return self.time_units[item]
+        return self.state[item]
 
     def __mul__(self, number: int):
         copies = []
         for _ in range(number):
             copies.append(copy.deepcopy(self))
         return copies
+
+    def set_verbosity(self, verbose: bool):
+        self.verbose = verbose
+
+    def __repr__(self):
+
+        if self.verbose:
+            r = f"Beat(subdivision={self.subdivision}"
+            tus = []
+            for tu in self.state:
+                tu.set_verbose(False)
+                tus.append(tu)
+            r += f",\n     time_units={str(tus)}"
+            r += ")"
+        else:
+            r = str(self.state)
+        return r
+
 
 class MeasureIterator:
 
@@ -189,28 +247,17 @@ class MeasureIterator:
         else:
             raise StopIteration
 
+
 class Measure:
-    """
-    Container for Beats.
-
-    Three options for initialization:
-    1) Supply iterable of Beat object. This is useful if passing Beats with pre-defined state.
-    2) Supply an iterable integers, where the number of items represents the number of beats,
-    and the values of the integers represents the respective subdivision of each beat.
-    3) Combination of the previous two.
-
-    Note that passing an integer will automatically instantiate an "empty" beat. That is,
-    all TimeUnit objects will be set to 0 within that beat.
-    """
 
     def __init__(self,
-                 beats: Union[Iterable[Beat],Iterable[int]],
+                 beats: Union[Collection[Union[int,Beat,Collection[int]]]],
                  verbose: bool = False):
         """
         Three options for initialization:
-        1) Supply iterable of Beat object. This is useful if passing Beats with pre-defined state.
-        2) Supply an iterable integers, where the number of items represents the number of beats,
-        and the values of the integers represents the respective subdivision of each beat.
+        1) Supply iterable of Beat object. This is useful if passing Beats with pre-defined time_units.
+        2) Supply a collection of collections of integers, where the number of items represents the number
+           of time_units, and the values of the integers represents the respective subdivision of each beat.
         3) Combination of the previous two.
 
         Note that passing an integer will automatically instantiate an "empty" beat. That is,
@@ -220,55 +267,80 @@ class Measure:
         :param verbose: if True, __repr__ gives more info.
         """
 
-        self._parse_arg(beats)
+        self.beats: ArrayLike[Beat] = beats  # calls setter method
 
-        self.beats: ArrayLike[Beat]
-        self.n_beats: int
+        self.verbose: bool = verbose
 
-        self.verbose: bool = False
+    @property
+    def beats(self):
+        return self._beats
 
-    def _parse_arg(self, beats):
+    @beats.setter
+    def beats(self,value):
 
-        arg_set = set([type(a) for a in beats])
+        ic(value)
+        value_type_set = set([type(b) for b in value])
 
         beat_set = {Beat}
         int_set = {int}
-        mixed_set = {Beat,int}
+        col_of_ints_set = {Collection}
+        mixed_set = {Beat, int}
 
-        # validate type-set of `beats` arg
-        if arg_set.isdisjoint(mixed_set):
-            msg = "Argument `beats` must be an iterable containing only integers and/or " \
-                  "Beat objects."
-            raise AttributeError(msg)
+        # collection of collections of integers
+        coll_of_colls = all([issubclass(type(b), Collection) for b in value])
+        if coll_of_colls:
+            self._beats = np.array([Beat(c) for c in value])
 
         # contains only Beats -- no validation needed
-        elif arg_set.issubset(beat_set):
-            self.beats = np.array(beats)
-            self.n_beats = self.beats.size
+        elif value_type_set.issubset(beat_set):
+            self._beats = np.array(value)
 
         # contains only integers -- validated by Beat constructor
-        elif arg_set.issubset(int_set):
-            self.beats = np.array([Beat(a) for a in beats])
-            self.n_beats = self.beats.size
+        elif value_type_set.issubset(int_set):
+            self._beats = np.array([Beat(a) for a in value])
 
         # contains mixture Beat and int -- validated by Beat constructor
         else:
             _beats = []
-            for b in beats:
+            for b in value:
                 if type(b) == int:
                     _beats.append(Beat(b))
                 else:
                     _beats.append(b)
-            self.beats = np.array(_beats)
-            self.n_beats = self.n_beats.size
+            self._beats = np.array(_beats)
 
+    @property
+    def state(self):
+        """
+        1-d numeric array containing state of each beat in Measure.
+        """
+        beat_list = self.beats.tolist()
+        state = np.array([b.state for b in beat_list])
+        return state
 
-        # validate arg types
-        if not arg_set.issubset(mixed_set):
-            msg = "Argument `beats` must be an iterable containing Beat objects and/or itegers."
-            raise AttributeError(msg)
+    @property
+    def n_beats(self):
+        return self.beats.shape[0]
 
-    #### ACTIVATION FUNCTIONS ####
+    @property
+    def is_active(self):
+        pass
+
+    #### UTILITY FUNCTIONS ####
+    # TODO: implement override/reshape checks
+    def set_state(self,
+                  state: [Collection[Collection[int]]],
+                  override: bool = True,
+                  reshape: bool = False):
+        """
+        Sets `state` array as well as `beats` array.
+
+        :param override: If False, will raise exception if trying to override a stateful measure.
+        :param reshape: If False, will raise exception if `state` argument would result in "reshaping"
+                        the measure (ie. changing the number of beats, or number of subdivisions in a beat.)
+        """
+        self.beats = state
+
     def __iter__(self):
         return MeasureIterator(self)
 
@@ -281,7 +353,7 @@ class Measure:
             return r
         else:
             m = list()
-            for beat in list(self.beats):
+            for beat in list(self.state):
                 b = list()
                 for tu in beat:
                     # tu.set_verbose(False)
@@ -296,6 +368,7 @@ class Part:
     """
     Container for Measures
     """
+    pass
 
 
 class Score:
