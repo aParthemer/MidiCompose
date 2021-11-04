@@ -48,7 +48,7 @@ class TimeUnit:
         if type(other) == int:
             return self.state == other
         else:
-            return self.state == other.time_units
+            return self.state == other.state
 
     def __int__(self):
         return int(self.state)
@@ -97,53 +97,39 @@ class Beat:
         :param verbose: determines format of output
         """
 
-        self._parse_beat_arg(beat)
+        # self._parse_beat_arg(beat)
 
-        self.time_units: ArrayLike[TimeUnit]
+        self.time_units: ArrayLike[TimeUnit] = beat  # calls setter method
 
         self.verbose = verbose
 
-        self._validate()
+    @property
+    def time_units(self):
+        return self._time_units
 
-    def _parse_beat_arg(self, beat):
-        """
-        Argument `beat` must either be a single integer representing the
-        number of subdivisions, or an iterable of TimeUnit or TimeUnit-compatible
-        integers (ie. {0,1,2}).
-        """
+    @time_units.setter
+    def time_units(self,value):
 
-        # if integer, `beat` represents number of subdivisions
-        if isinstance(beat, int):
-            self.time_units = np.array([TimeUnit() for _ in range(beat)])
-            self.state = self.time_units
-
-        # else, `beat` represents iterable of TimeUnit-like objects
+        # if integer, `value` represents number of subdivisions
+        if isinstance(value, int):
+            self._time_units = np.array([TimeUnit() for _ in range(value)])
         else:
-            beat_set = set([type(a) for a in beat])
-            valid = {int, TimeUnit}
-            if not beat_set.issubset(valid):
-                msg = "If giving an iterable for `beat`, each element must either be an " \
-                      "integer in {0,1,2} or a TimeUnit object"
-                raise TypeError(msg)
-            if beat_set == {TimeUnit}:
-                time_units = beat
-            else:
-                time_units = []
-                for item in beat:
-                    if isinstance(item, TimeUnit):
-                        time_units.append(item)
+            tu_like_type_set = {int, TimeUnit}
+            value_type_set = set([type(v) for v in value])
+
+            # else, collection of integers/TimeUnit objects
+            if value_type_set.issubset(tu_like_type_set):
+                _time_units = []
+                for v in value:
+                    if isinstance(v, TimeUnit):
+                        _time_units.append(v)
                     else:
-                        tu = TimeUnit(item)
-                        time_units.append(tu)
-            self.time_units = np.array(time_units)
-            self.state = self.time_units
+                        _time_units.append(TimeUnit(v))
+                self._time_units = np.array(_time_units)
 
-    def _validate(self):
-
-        # subdivision must be >= 1
-        if self.subdivision < 1:
-            msg = "`subdivision` must be >= 1."
-            raise ValueError(msg)
+            else:
+                msg = f"Invalid input"
+                raise AttributeError(msg)
 
     @property
     def subdivision(self) -> int:
@@ -154,11 +140,8 @@ class Beat:
         """
         1d numeric array representing the state of each TimeUnit in the Beat.
         """
-        return self._state
-
-    @state.setter
-    def state(self,value):
-        self._state = np.array([int(n) for n in value])
+        state = np.array([tu.state for tu in self.time_units])
+        return state
 
     @property
     def is_active(self) -> bool:
@@ -177,30 +160,21 @@ class Beat:
                   state: Collection[int],
                   override: bool = False):
         """
-        Set the time_units of the TimeUnit instances to either 0,1 or 2.
+        Set the `state` of the beat instance to collection of either 0,1 or 2.
 
-        :param state: Collection of integers
+        Automatically updates `time_units` attribute.
+
+        :param state: Collection of integers in {0,1,2}
         :param override: If False, error will be raised if setting time_units to an already active
         """
+        valid_state_set = {0,1,2}
+        given_state_set = set(state)
+        if not given_state_set.issubset(valid_state_set):
+            msg = "Parameter `state` takes a collection containing only integers 0,1 and 2."
+            raise AttributeError(msg)
 
-        # validation
-        if not override:
-            if self.is_active:
-                msg = "Cannot set time_units to an already active beat. If you wish to override" \
-                      "the current time_units, set argument `override` to True."
-                raise AttributeError(msg)
-
-        valid_set = {0, 1, 2}
-        valid_len = self.subdivision
-        if len(state) != valid_len:
-            msg = "The collection passed to argument `time_units` must have the same number" \
-                  "of elements as the number of subdivisions in the Beat."
-            raise ValueError(msg)
-        elif not set(state).issubset(valid_set):
-            msg = "`time_units` can only take a collection containing {0,1,2}"
-            raise ValueError(msg)
-
-        self.state = state
+        # PICKUP HERE -- SEE FAILING TEST
+        self.time_units = state  # calls setter method
 
     def __iter__(self):
         return BeatIterator(self)
@@ -247,7 +221,7 @@ class MeasureIterator:
         else:
             raise StopIteration
 
-
+# TODO: add support for heterogenous measures
 class Measure:
 
     def __init__(self,

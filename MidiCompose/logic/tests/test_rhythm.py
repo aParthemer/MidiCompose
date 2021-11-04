@@ -48,55 +48,20 @@ def test_TimeUnit_integer():
 
 #### Beat ####
 
-def test_Beat_constructor_given_subdivision():
-    b = Beat(4)
+def test_Beat_constructor():
+    constructor_args = [
+        4,
+        [1,2,0,0],
+        [TimeUnit(0),TimeUnit(1)]
+    ]
+    for a in constructor_args:
+        b = Beat(a)
 
-    assert b.subdivision == 4
-    assert type(b.state) == np.ndarray
-    assert type(b[0]) == np.int64
-    assert type(b.time_units) == np.ndarray
-    assert type(b.time_units[0]) == TimeUnit
+        assert type(b.time_units) == np.ndarray
+        assert type(b.time_units[0]) == TimeUnit
 
-    assert b.state.ndim == 1
-
-    # all TimeUnit instances have `time_units` == 0
-    assert set([int(tu) for tu in b.time_units]).issubset({0})
-
-    with pytest.raises(TypeError):
-        Beat("1")
-    with pytest.raises(ValueError):
-        invalid = [0, -1]
-        [Beat(a) for a in invalid]
-
-
-def test_Beat_constructor_given_iterable():
-    b = Beat([1, 0, 1, 2])
-
-    assert b.subdivision == 4
-    assert type(b.state) == np.ndarray
-    assert b.state.ndim == 1
-    assert b[0] == 1
-    assert b[-1] == 2
-
-    b = Beat([TimeUnit(0), 1, 2])
-
-    assert b.subdivision == 3
-    assert type(b.state) == np.ndarray
-    assert b.state.ndim == 1
-
-    with pytest.raises(TypeError):
-        invalid = [
-            "1012",
-            [1, 0, "1", 2]
-        ]
-        [Beat(a) for a in invalid]
-
-    with pytest.raises(ValueError):
-        invalid = [
-            [1, 2, 3],
-            [0, -1]
-        ]
-        [Beat(a) for a in invalid]
+        assert type(b.state) == np.ndarray
+        assert type(b.state[0]) == np.int64
 
 
 def test_Beat_iterator():
@@ -122,8 +87,16 @@ def test_Beat_mul():
         assert type(b_copy[0]) == np.int64
         assert b_copy.time_units[0] == 1
 
-# TODO
+
 def test_Beat_set_state():
+    b = Beat([1,2,1,2])
+
+    assert list(b.state) == [1,2,1,2]
+    assert list(b.time_units) == [TimeUnit(1),TimeUnit(2),TimeUnit(1),TimeUnit(2)]
+
+    b.set_state([1,0,1,1])
+    assert list(b.state) == [1,0,1,1]
+    assert list(b.time_units) == [TimeUnit(1),TimeUnit(0),TimeUnit(1),TimeUnit(1)]
     pass
 
 #### Measure ####
@@ -151,6 +124,7 @@ def test_Measure_constructor():
     m = Measure(beats=beats)
     assert m.state[0][0] == 0
     assert m.state[1][0] == 2
+
 
 def test_Measure_constructor_given_mixture():
     # time_units = (4,Beat,5)
