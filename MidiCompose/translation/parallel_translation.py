@@ -7,7 +7,7 @@ from icecream import ic
 import config
 from MidiCompose.translation import parse_state as ps, sandbox
 from MidiCompose.translation.parse_state import StateAttributes
-from MidiCompose.translation import midi_translation as mt
+
 
 #### ATTRIBUTE CONTAINERS ####
 
@@ -15,7 +15,6 @@ from MidiCompose.translation import midi_translation as mt
 class AdjustedAttributes:
     adj_timestamp: np.ndarray
     adj_msg_types: np.ndarray
-
 
 @dataclass
 class ConsolidatedAttributes:
@@ -111,35 +110,6 @@ def get_parallel_attrs(state_attrs: List[StateAttributes]):
 
     return _get_parallel_attrs(cons_attrs, adj_attrs)
 
-
-if __name__ == '__main__':
-
-    state_a = np.array([
-        -1, -2,
-        -3, 4, 1, 1, 1, 1,
-        -3, 3, 1, 1, 1
-    ])
-
-    state_b = np.array([
-        -1, -2,
-        -3, 3, 1, 1, 1,
-        -3, 4, 1, 1, 1, 1
-    ])
-    STATES = [state_a, state_b]
-    TPB = 60
-
-    state_attrs = ps.get_multiple_state_attributes(STATES,TPB)
-    pa = get_parallel_attrs(state_attrs)
-
-    m = sandbox.get_messages_parallel(pa)
-    ic(m)
-
-    t = mt.track_from_messages(m)
-    ic(t)
-    mid = mt.mid_from_tracks([t],TPB)
-    ic(mid.tracks)
-
-    mt.save_mid(mid,config.DIR_MIDIFILES + "/multiple_channels.mid")
 
 
 

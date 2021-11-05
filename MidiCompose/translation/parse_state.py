@@ -9,7 +9,7 @@ from mido import Message, MidiTrack, MetaMessage, MidiFile
 import config
 
 
-#### OBJECTS ####
+#### CONTAINER OBJECTS ####
 
 @dataclass
 class StateAttributes:
@@ -178,6 +178,7 @@ def get_state_attributes(state: np.ndarray,
 
 
 #### MULTIPLE STATE ####
+
 def get_multiple_state_attributes(states: Collection[np.ndarray],
                                   tpb: int) -> List[StateAttributes]:
 
