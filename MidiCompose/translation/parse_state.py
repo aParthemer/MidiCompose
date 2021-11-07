@@ -42,7 +42,7 @@ def get_active_state(state: np.ndarray) -> np.ndarray:
 
 def get_subdivision_flags(state: np.ndarray) -> np.ndarray:
     """
-    Returns array where each element represents the number of subdivisions within a beat.
+    Returns array where each element represents the number of subdivisions within a time_units.
     """
 
     idx_sub_flag = np.where(state == -3)[0] + 1

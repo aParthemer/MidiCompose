@@ -2,8 +2,11 @@ from typing import Optional, Iterable, Any, Union, Tuple, List, Collection
 import copy
 
 import numpy as np
+
+from MidiCompose.utilities import temp_seed
+
 from icecream import ic
-from numpy.typing import ArrayLike
+
 
 
 class TimeUnit:
@@ -40,6 +43,13 @@ class TimeUnit:
 
     def deactivate(self):
         self.state = 0
+
+    def set_state(self, value: int):
+        if not value in {0,1,2}:
+            msg = f"Invalid value. TimeUnit `state` must be in {0,1,2}."
+            raise ValueError(msg)
+        else:
+            self.state = value
 
     def set_verbose(self, verbose: bool):
         self.verbose = verbose
@@ -85,21 +95,21 @@ class Beat:
 
     Definitive attribute is `self.time_units`, which is a numpy array containing TimeUnit objects.
 
-    Argument `beat` must either be a single integer representing the number of
+    Argument `time_units` must either be a single integer representing the number of
     subdivisions, or an iterable containing TimeUnit objects and/or "TimeUnit-like"
     integers (ie. {0,1,2}). The latter is useful when passing stateful TimeUnit objects.
     """
 
     def __init__(self,
-                 beat: Union[int, Iterable[Union[int, TimeUnit]]] = 1,
+                 time_units: Union[int, Iterable[Union[int, TimeUnit]]] = 1,
                  verbose: bool = False):
         """
         :param verbose: determines format of output
         """
 
-        # self._parse_beat_arg(beat)
+        # self._parse_beat_arg(time_units)
 
-        self.time_units: ArrayLike[TimeUnit] = beat  # calls setter method
+        self.time_units = time_units  # calls setter method
 
         self.verbose = verbose
 
@@ -112,7 +122,7 @@ class Beat:
 
         # if integer, `value` represents number of subdivisions
         if isinstance(value, int):
-            self._time_units = np.array([TimeUnit() for _ in range(value)])
+            self._time_units = [TimeUnit() for _ in range(value)]
         else:
             tu_like_type_set = {int, TimeUnit}
             value_type_set = set([type(v) for v in value])
@@ -125,7 +135,7 @@ class Beat:
                         _time_units.append(v)
                     else:
                         _time_units.append(TimeUnit(v))
-                self._time_units = np.array(_time_units)
+                self._time_units = _time_units
 
             else:
                 msg = f"Invalid input"
@@ -133,26 +143,26 @@ class Beat:
 
     @property
     def subdivision(self) -> int:
-        return self.time_units.size
+        return len(self.time_units)
 
     @property
     def state(self) -> np.ndarray:
         """
         1d numeric array representing the state of each TimeUnit in the Beat.
         """
-        state = np.array([tu.state for tu in self.time_units])
+        state = np.empty(shape=(self.subdivision + 2,), dtype=np.int8)
+        state[:2] = [-3, self.subdivision]
+        state[2:] = [tu.state for tu in self.time_units]
         return state
 
+    # TODO
     @property
     def is_active(self) -> bool:
         """
         Returns True if any TimeUnit instances contain active time_units (1 or 2).
         Otherwise, returns False.
         """
-        if self.state.all() == 0:
-            return False
-        else:
-            return True
+        pass
 
     #### UTILITY FUNCTIONS ####
 
@@ -160,7 +170,7 @@ class Beat:
                   state: Collection[int],
                   override: bool = False):
         """
-        Set the `state` of the beat instance to collection of either 0,1 or 2.
+        Set the `state` of the time_units instance to collection of either 0,1 or 2.
 
         Automatically updates `time_units` attribute.
 
@@ -176,11 +186,36 @@ class Beat:
         # PICKUP HERE -- SEE FAILING TEST
         self.time_units = state  # calls setter method
 
+    def activate_random(self,
+                        density: float,
+                        random_seed: Optional[int] = None):
+        """
+        :param density: float between 0 and 1 representing the density of activation.
+        :param random_seed: Provide a random seed for reproducibility.
+        """
+        if random_seed is not None:
+            with temp_seed(random_seed):
+                choices = np.random.choice(a=[0,1],
+                                           size=self.subdivision,
+                                           p=[1-density,density])
+                ic(choices)
+                [tu.set_state(c) for tu,c in zip(self.time_units,choices)]
+
+    # TODO
+    def sustain_all(self):
+        pass
+
+    # TODO
+    def shorten_all(self):
+        pass
+
+    #### MAGIC METHODS ####
+
     def __iter__(self):
         return BeatIterator(self)
 
     def __getitem__(self, item) -> TimeUnit:
-        return self.state[item]
+        return self.state[item+2]
 
     def __mul__(self, number: int):
         copies = []
@@ -213,7 +248,7 @@ class MeasureIterator:
         self._index = 0
         self._len_Measure = self._Measure.n_beats
 
-    def __next__(self):
+    def __next__(self) -> Beat:
         if self._index < self._len_Measure:
             result = self._Measure.beats[self._index]
             self._index += 1
@@ -231,19 +266,20 @@ class Measure:
         Three options for initialization:
         1) Supply iterable of Beat object. This is useful if passing Beats with pre-defined time_units.
         2) Supply a collection of collections of integers, where the number of items represents the number
-           of time_units, and the values of the integers represents the respective subdivision of each beat.
+           of time_units, and the values of the integers represents the respective subdivision of each time_units.
         3) Combination of the previous two.
 
-        Note that passing an integer will automatically instantiate an "empty" beat. That is,
-        all TimeUnit objects will be set to 0 within that beat.
+        Note that passing an integer will automatically instantiate an "empty" time_units. That is,
+        all TimeUnit objects will be set to 0 within that time_units.
 
         :param beats: iterable containing Beat objects, bare integers, or a combination of the two.
         :param verbose: if True, __repr__ gives more info.
         """
 
-        self.beats: ArrayLike[Beat] = beats  # calls setter method
-
+        self.beats: Collection[Beat] = beats  # calls setter method
         self.verbose: bool = verbose
+
+    #### PROPERTIES ####
 
     @property
     def beats(self):
@@ -252,7 +288,6 @@ class Measure:
     @beats.setter
     def beats(self,value):
 
-        ic(value)
         value_type_set = set([type(b) for b in value])
 
         beat_set = {Beat}
@@ -263,15 +298,15 @@ class Measure:
         # collection of collections of integers
         coll_of_colls = all([issubclass(type(b), Collection) for b in value])
         if coll_of_colls:
-            self._beats = np.array([Beat(c) for c in value])
+            self._beats = [Beat(c) for c in value]
 
         # contains only Beats -- no validation needed
         elif value_type_set.issubset(beat_set):
-            self._beats = np.array(value)
+            self._beats = [v for v in value]
 
         # contains only integers -- validated by Beat constructor
         elif value_type_set.issubset(int_set):
-            self._beats = np.array([Beat(a) for a in value])
+            self._beats = [Beat(a) for a in value]
 
         # contains mixture Beat and int -- validated by Beat constructor
         else:
@@ -281,21 +316,24 @@ class Measure:
                     _beats.append(Beat(b))
                 else:
                     _beats.append(b)
-            self._beats = np.array(_beats)
+            self._beats = _beats
 
     @property
     def state(self):
         """
-        1-d numeric array containing state of each beat in Measure.
+        1-d numeric array containing state of each time_units in Measure.
         """
-        beat_list = self.beats.tolist()
-        state = np.array([b.state for b in beat_list])
+        beat_states = np.concatenate([b.state for b in self.beats])
+        state = np.empty(shape=(beat_states.size+1,),dtype=np.int8)
+        state[0] = -2
+        state[1:] = beat_states
         return state
 
     @property
     def n_beats(self):
-        return self.beats.shape[0]
+        return len(self.beats)
 
+    # TODO
     @property
     def is_active(self):
         pass
@@ -311,9 +349,11 @@ class Measure:
 
         :param override: If False, will raise exception if trying to override a stateful measure.
         :param reshape: If False, will raise exception if `state` argument would result in "reshaping"
-                        the measure (ie. changing the number of beats, or number of subdivisions in a beat.)
+                        the measure (ie. changing the number of beats, or number of subdivisions in a time_units.)
         """
         self.beats = state
+
+    #### MAGIC METHODS ####
 
     def __iter__(self):
         return MeasureIterator(self)
@@ -326,14 +366,16 @@ class Measure:
             r = "IMPLEMENT VERBOSE"
             return r
         else:
-            m = list()
-            for beat in list(self.state):
-                b = list()
-                for tu in beat:
-                    # tu.set_verbose(False)
-                    b.append(tu)
-                m.append(str(b))
-            r = "\n".join(m)
+            state_list = list(self.state)
+            r = "Measure("
+            for val in state_list:
+                if val == -2:
+                    r += str(val)
+                elif val == -3:
+                    r += "\n" + str(val)
+                else:
+                    r += " " + str(val)
+            r += ")"
 
             return r
 
@@ -342,7 +384,21 @@ class Part:
     """
     Container for Measures
     """
-    pass
+    def __init__(self,measures: Collection[Measure]):
+        self.measures = measures
+
+    @property
+    def measures(self):
+        return self._measures
+
+    @measures.setter
+    def measures(self,value):
+        self._measures = [measure for measure in value]
+
+    # TODO
+    @property
+    def state(self):
+        pass
 
 
 class Score:

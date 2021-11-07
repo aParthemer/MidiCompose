@@ -5,7 +5,7 @@ import numpy as np
 from icecream import ic
 
 import config
-from MidiCompose.translation import parse_state as ps, sandbox
+from MidiCompose.translation import parse_state as ps
 from MidiCompose.translation.parse_state import StateAttributes
 
 
