@@ -1,1 +1,0 @@
-MAKE_EXECUTABLE = "/c/Users/Alex/PycharmProjects/MidiCompose/MidiCompose/fluidsynth_util/shell_scripts/make_executable.sh"
