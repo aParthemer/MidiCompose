@@ -1,9 +1,10 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from MidiCompose.logic.rhythm import Beat, TimeUnit
+from MidiCompose.logic.rhythm.time_unit import TimeUnit
+from MidiCompose.logic.rhythm.beat import Beat
 
-
+#### PROPERTIES ####
 def test_constructor():
     constructor_args = [
         4,
@@ -19,11 +20,16 @@ def test_constructor():
         assert type(b.state) == np.ndarray
         assert type(b.state[0]) == np.int8
 
-
 def test_state():
     b = Beat([1,0,1,2])
     expected_st = np.array([-3,4,1,0,1,2])
     assert_array_equal(b.state,expected_st)
+
+def test_subdivision():
+
+    b = Beat([1,0,0,0])
+
+    assert b.subdivision == 4
 
 
 def test_iterator():
@@ -59,6 +65,8 @@ def test_set_state():
     assert_array_equal(b.state,expected_st)
     assert b.time_units == [TimeUnit(1),TimeUnit(2),TimeUnit(1),TimeUnit(2)]
 
+#### UTILITY METHODS ####
+
 def test_activate_random():
     b = Beat(8)
     assert {0}.issuperset(set([tu.state for tu in b.time_units]))
@@ -70,5 +78,13 @@ def test_activate_random():
 
         assert 1 in b.state
 
+def test_sustain_all():
+    b = Beat([1,0,1,0,0,0])
+    b.sustain_all()
+    assert_array_equal(b.state,np.array([-3,6,  1,2,1,2,2,2]))
 
+def test_short_all():
+    b = Beat([1,2,2,1,2,2,1,0])
+    b.shorten_all()
+    assert_array_equal(b.state,np.array([-3,8,  1,0,0,1,0,0,1,0]))
 

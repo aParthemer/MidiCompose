@@ -1,25 +1,14 @@
 import pytest
 
-from MidiCompose.logic.harmony import Note,Interval
+from MidiCompose.logic.harmony.note import Note
+from MidiCompose.logic.harmony.interval import Interval
 
-#### NOTE ####
-def test_note_constructor():
+def test_constructor_hs():
 
-    n = Note(60)
-    assert n.value == 60
+    interval = Interval(0)
+    assert interval.hs == 0
+    assert interval.string == "P0"
 
-    notes_invalid_type = [1.1]
-    with pytest.raises(TypeError):
-        [Note(n) for n in notes_invalid_type]
-
-    # notes_out_of_range = [-1,128]
-    with pytest.raises(ValueError):
-        Note(-1)
-
-#### INTERVAL ####
-
-
-def test_Interval_constructor_hs():
     interval = Interval(3)
     assert interval.hs == 3
     assert interval.string == "m3"
@@ -40,7 +29,7 @@ def test_Interval_constructor_hs():
         for n in out_of_range:
             interval = Interval(n)
 
-def test_Interval_constructor_string():
+def test_constructor_string():
 
     interval = Interval("P4")
     assert interval.string == "P4"
@@ -56,26 +45,25 @@ def test_Interval_constructor_string():
     assert interval.value == 3
     assert interval.octave_shift == 2
 
+
     with pytest.raises(ValueError):
         invalid_strings = ["A","Bb","U-","P5-"]
         [Interval(s) for s in invalid_strings]
 
-def test_Interval_above_and_below():
+def test_above_and_below():
     """
     Supports comparison between integers AND other Note objects.
     """
 
     # pass an integer
     note = 60
-    assert Interval("M3").above(note) == 64
-    assert Interval("M3").above(note) == Note(64)
-    assert Interval("M3").below(note) == 56
-    assert Interval("M3").below(note) == Note(56)
+    assert Interval("M3").above(note) == 64 == Note(64)
+    assert type(Interval("M3").above(note)) == Note
+    assert Interval("M3").below(note) == 56 == Note(56)
 
     # pass Note object
     note = Note(60)
-    assert Interval("P4").above(note) == 65
-    assert Interval("P4").above(note) == Note(65)
-    assert Interval("P4").below(note) == 55
-    assert Interval("P4").below(note) == Note(55)
-
+    assert Interval("P4").above(note) == 65 == Note(65)
+    assert type(Interval("P4").above(note)) == Note
+    assert Interval("P4").below(note) == 55 == Note(55)
+    # assert Interval("P4").below(note)

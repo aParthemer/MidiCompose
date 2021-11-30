@@ -192,7 +192,7 @@ class MidInfo:
 
     def get_note_tracks(self, strip=False) -> List[MidiTrack]:
         """
-        Return only tracks which contain notes
+        Return only tracks which contain note_vals
 
         :param strip : if True, remove all non-note messages from track
         """
