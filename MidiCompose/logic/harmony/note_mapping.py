@@ -6,6 +6,26 @@ import numpy as np
 
 #### NOTE REPRESENTATION MAPPER ####
 
+RANGELESS_NOTES = {
+    "C":0,
+    "C#":1,
+    "Db":1,
+    "D":2,
+    "D#":3,
+    "Eb":3,
+    "E":4,
+    "F":5,
+    "F#":6,
+    "Gb":6,
+    "G":7,
+    "G#":8,
+    "Ab":8,
+    "A":9,
+    "A#":10,
+    "Bb":10,
+    "B":11
+}
+
 @dataclass
 class FlatNoteMatrix:
     values: np.ndarray
@@ -146,28 +166,30 @@ def value_to_letter(value: int,
 
     if value not in range(128):
         msg = f"`value` `{value}` out of range."
-        raise ValueError
+        raise ValueError(msg)
 
     # always try bare letter first
     if value in VALUE_LETTER.values:
-        return FLAT_NOTE_MATRIX.letters[value]
+        return str(FLAT_NOTE_MATRIX.letters[value])
 
     elif accidental is None:
         # default flat
         if value in VALUE_FLAT.values:
-            return FLAT_NOTE_MATRIX.flats[value]
+            return str(FLAT_NOTE_MATRIX.flats[value])
 
     elif accidental == "sharp":
         # bare letter first
         if value in VALUE_SHARP.values:
-            return FLAT_NOTE_MATRIX.sharps[value]
+            return str(FLAT_NOTE_MATRIX.sharps[value])
 
     elif accidental == "flat":
         if value in VALUE_FLAT.values:
-            return FLAT_NOTE_MATRIX.flats[value]
+            return str(FLAT_NOTE_MATRIX.flats[value])
 
 def letter_to_value(letter: str) -> int:
-    if letter[1] == "b":
+    if letter in RANGELESS_NOTES.keys():
+        return RANGELESS_NOTES[letter]
+    elif letter[1] == "b":
         if letter in VALUE_FLAT.flats:
             return np.where(FLAT_NOTE_MATRIX.flats == letter)[0][0]
     elif letter[1] == "#":
@@ -178,3 +200,4 @@ def letter_to_value(letter: str) -> int:
     else:
         msg = f"Invalid `letter`: `{letter}`"
         raise ValueError(msg)
+

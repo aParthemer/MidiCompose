@@ -1,15 +1,39 @@
 import contextlib
+import random
+from typing import Optional
+
 import numpy as np
 
 
 @contextlib.contextmanager
 def temp_seed(seed):
     state = np.random.get_state()
-    np.random.seed(seed)
-    try:
-        yield
-    finally:
+    print(seed)
+    if seed is None:
         np.random.set_state(state)
+        yield
+
+    else:
+        print("yo")
+        np.random.seed(seed)
+        try:
+            yield
+        finally:
+            np.random.set_state(state)
+
+@contextlib.contextmanager
+def random_seed(seed: Optional[int]):
+    if seed is None:
+        yield
+    else:
+        random_state = random.getstate()
+        random.seed(seed)
+        try:
+            yield
+        finally:
+            random.setstate(random_state)
+
+
 
 
 class TwoWayDict(dict):

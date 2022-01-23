@@ -1,8 +1,10 @@
-from typing import Collection, Optional, List
+from copy import deepcopy
+from typing import Collection, Optional, List, Sequence
 
 import numpy as np
 
 from MidiCompose.logic.rhythm.measure import Measure
+
 
 class PartIterator:
 
@@ -18,6 +20,7 @@ class PartIterator:
             return result
         else:
             raise StopIteration
+
 
 class Part:
     """
@@ -35,8 +38,9 @@ class Part:
     def measures(self, value):
 
         if value is None:  # initialize empty part
-            value = [Measure()]
-        self._measures = [measure for measure in value]
+            self._measures = []
+        else:
+            self._measures = [measure for measure in value]
 
     @property
     def state(self):
@@ -62,6 +66,27 @@ class Part:
     def active_state(self):
         pass
 
+    #### UTILITY METHODS ####
+    def append_measure(self, measure: Measure):
+
+        if not isinstance(measure,Measure):
+            e = "`measure` must be a Measure instance."
+            raise TypeError(e)
+
+        self.measures.append(measure)
+        return self
+
+    #### GENERATOR METHODS ####
+
+    def get_complement(self, measure_idx: Optional[Sequence[int]] = None):
+
+        if measure_idx is not None:
+            e = "Implement measure indexing!"
+            raise NotImplementedError(e)
+        _measures = self._measures
+        complement = Part([m.get_complement() for m in _measures])
+        return complement
+
     #### MAGIC METHODS ####
     def __iter__(self):
         return PartIterator(self)
@@ -72,15 +97,16 @@ class Part:
     def __len__(self):
         return len(self.measures)
 
+    def __mul__(self, other: int):
+        return [deepcopy(self) for _ in range(other)]
+
     def __repr__(self):
-        header = "Part(["
-        r = header
+
+        r = "Part(["
         measure_strings = [str(m) for m in self.measures]
         for m in measure_strings:
-            r += "\n" + " "*len(header) + m
-        r += "\n    ])"
-
+            r += "\n" + " " + m
+        r += f"\nn_beats: {self.n_beats}"
+        r += "\n])"
         return r
-
-
 

@@ -1,7 +1,7 @@
 from typing import Union, Sequence, List, Optional
 
 import numpy as np
-from mido import Message
+from mido import Message, MidiTrack, bpm2tempo, MetaMessage
 
 from MidiCompose.logic.harmony.note import Note
 from MidiCompose.logic.melody.melody import Melody
@@ -10,26 +10,26 @@ from MidiCompose.translation import midi_translation as mt
 
 from icecream import ic as ice, ic
 
-
+# TODO: to_track() -> MidiTrack
 class TrackBuilder:
     """
-    Class for combining rhythmic state objects (Beat,Measure,Part) with appropriately sized melodic objects,
+    Class for combining rhythmic figure objects (Beat,Measure,Part) with appropriately sized melodic objects,
     and parsing these objects into arrays of midi-message attributes.
 
     Crucial property is self.parsed, which is a list of dictionaries containing midi-message attributes.
 
     Various parsing scenarios:
-        - Single state, single melody
-        - Single state, multiple melodies
-        - Multiple state (of equal size), single melody per state
-        - Multiple state, multiple melodies per state
+        - Single figure, single melodies
+        - Single figure, multiple melodies
+        - Multiple figure (of equal size), single melodies per figure
+        - Multiple figure, multiple melodies per figure
 
     When multiple states (ie. multiple voices), option to "decouple" voices into separate tracks.
 
     Requires "rhythmic container(s)" as well as appropriately-sized "Melody-like" arrays of notes.
 
     Message attributes `type` and `time` come from rhythmic containers.
-    Message attribute `note` given by Melody object (or any sequence of Note objects)
+    Message attribute `item` given by Melody object (or any sequence of Note objects)
     Message attribute `channels` given as argument to parser
 
 
@@ -39,12 +39,13 @@ class TrackBuilder:
                  parts: Sequence[Part],
                  melodies: Sequence[Union[Note, Melody]],
                  channels: Optional[Sequence[int]] = None,
+                 bpm: int = 60,
                  tpb: int = 480):
 
-        # state
         self.parts = parts  # calls setter
         self.melodies = melodies  # calls setter
         self.channels = channels  # calls setter
+        self.bpm = bpm
 
         self.tpb = tpb
 
@@ -112,7 +113,7 @@ class TrackBuilder:
                     msg = "If giving multiple `Melody` for single `Part`, all melodies must have the same number of" \
                           "notes as part has `n_note_on`."
                     raise ValueError(msg)
-                else:  # note counts are equal
+                else:  # item counts are equal
                     _melodies = list(value)
 
             # multiple part, all melodies must have proper n_notes
@@ -145,7 +146,17 @@ class TrackBuilder:
                         else:
                             _melodies.append(v)
             else:  # multi part
-                ic("IMPLEMENT MIXED MULTIPART")
+                _parts_n_note_on = [p.n_note_on for p in self.parts]
+                _melodies = list()
+                for i,v in enumerate(value):
+                    if isinstance(v,Melody):
+                        if len(v) != _parts_n_note_on[i]:
+                            e = "Size of `Melody` must match n_note_on in corresponding `Part`"
+                            raise ValueError(e)
+                        else:
+                            _melodies.append(v)
+                    elif isinstance(v,Note):
+                        _melodies.append(Melody([v for _ in range(_parts_n_note_on[i])]))
 
         self._melodies = _melodies
 
@@ -160,10 +171,11 @@ class TrackBuilder:
 
         # if None, one channel per Melody
         if value is None:
-            _channels = [i for i in list(range(len(self.melodies)))]
+            _channels = [0 for _ in range(len(self.melodies))]
 
         else:
-            _channels = "IMPLEMENT CHANNELS SETTER!"
+            e = "IMPLEMENT CHANNELS SETTER!"
+            raise NotImplementedError(e)
 
         self._channels = _channels
 
@@ -180,16 +192,27 @@ class TrackBuilder:
             _multi_part = False
         return _multi_part
 
-    def parse(self):
+    def get_messages(self) -> List[Union[Message,MetaMessage]]:
 
-        parsed = None
+        messages = None
 
         if self.is_multi_part:
-            parsed = self._parse_multi_part()
+            messages = self._parse_multi_part()
         elif not self.is_multi_part:
-            parsed = self._parse_single_part()
+            messages = self._parse_single_part()
 
-        return parsed
+        _tempo = bpm2tempo(self.bpm)
+        messages.insert(0,MetaMessage(type="set_tempo",tempo=_tempo))
+
+        return messages
+
+    def get_track(self) -> MidiTrack:
+
+
+        _messages = self.get_messages()
+
+
+        return MidiTrack(_messages)
 
     def _parse_single_part(self) -> List[Message]:
 
@@ -200,9 +223,7 @@ class TrackBuilder:
 
     def _parse_multi_part(self) -> List[Message]:
 
-        ice("parsing multi-part")
         messages = mt.translate_multi_part(self.parts,self.melodies,self.channels,self.tpb)
-
         return messages
 
     #### MAGIC METHODS ####

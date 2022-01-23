@@ -24,8 +24,8 @@ def ofn(timedelta, off_note=64, on_note=64, channel=0, velocity=64) -> List[Mess
     ofn "off on" is used when simultaneously sending "note_off" and "note_on" messages.
     eg]
         [...,
-         Message(type="note_off",note=<off_note>,timedelta=<timedelta>),
-         Message(type="note_on",note=<on_note>,timedelta=0))
+         Message(type="note_off",item=<off_note>,timedelta=<timedelta>),
+         Message(type="note_on",item=<on_note>,timedelta=0))
          ...]
     """
     msgs = [Message(type="note_off", note=off_note, channel=channel, time=timedelta),
@@ -121,10 +121,10 @@ def translate_single_part(part: Part,
                           melodies: Union[Melody, Note],
                           channels: Sequence[int],
                           tpb: int = 480) -> List[Message]:
-    # get state attributes
+    # get figure attributes
     state_attrs = st.get_state_attributes(part.state, tpb=tpb)
 
-    # unpack state attributes
+    # unpack figure attributes
     timedelta = state_attrs.timedelta
     msg_types = state_attrs.msg_types
     total_ticks = state_attrs.total_ticks
@@ -150,10 +150,12 @@ def translate_single_part(part: Part,
             # current channel
             channel = channels[j]
 
-            # current melody
+            # current melodies
             current_idx_melody = idx_melodies[j]
-            current_note = melody.notes[current_idx_melody].value
-            velocity = melody.velocity[current_idx_melody]
+
+            if current_idx_melody < len(melody):
+                current_note = melody.notes[current_idx_melody].value
+                velocity = melody.velocity[current_idx_melody]
 
             if current_idx_melody > 0:
                 previous_note = melody.notes[current_idx_melody - 1].value
@@ -206,9 +208,9 @@ def translate_multi_part(parts: Sequence[Part],
 
     adj_msg_types = [a.adj_msg_types for a in adj_attrs]
 
-    # melody attributes
+    # melodies attributes
 
-    # tracks index of each melody during iteration
+    # tracks index of each melodies during iteration
     idx_of_melodies = [0 for _ in range(len(melodies))]
     idx_of_parts = [0 for _ in range(len(adj_msg_types))]
 
@@ -260,8 +262,6 @@ def translate_multi_part(parts: Sequence[Part],
 
                     _note = current_melody.notes[idx_of_melodies[idx_part]].value
                     _velocity = current_melody.velocity[idx_of_melodies[idx_part]]
-
-                    # ic(_note,_velocity)
 
                     messages.append(Message(type=_type,time=_timedelta,note=_note,
                                             channel=_channel,velocity=_velocity))

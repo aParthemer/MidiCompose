@@ -60,10 +60,20 @@ def test_mul():
 
 def test_set_state():
     b = Beat([1,2,1,2])
+    print(b)
     expected_st = np.array([-3,4,1,2,1,2])
 
     assert_array_equal(b.state,expected_st)
     assert b.time_units == [TimeUnit(1),TimeUnit(2),TimeUnit(1),TimeUnit(2)]
+
+    # alter figure
+    b.set_state([0,1,2,2,1])
+    print(b)
+
+    expected_st = np.array([-3, 5, 0, 1, 2, 2, 1])
+
+    assert_array_equal(b.state, expected_st)
+    assert b.time_units == [TimeUnit(0), TimeUnit(1), TimeUnit(2), TimeUnit(2), TimeUnit(1)]
 
 #### UTILITY METHODS ####
 

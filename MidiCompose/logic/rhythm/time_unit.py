@@ -27,19 +27,36 @@ class TimeUnit:
 
     def activate(self):
         self.state = 1
+        return self
 
     def sustain(self):
         self.state = 2
+        return self
 
     def deactivate(self):
         self.state = 0
+        return self
+
+    def toggle(self):
+        """
+        Convert "on" to "off" and vice versa.
+
+        Sustain toggles to "on"
+        """
+        if self.state in (0,2):
+            self.state = 1
+        elif self.state == 1:
+            self.state = 0
+
+        return self
 
     def set_state(self, value: int):
         if not value in {0, 1, 2}:
-            msg = f"Invalid value. TimeUnit `state` must be in {0, 1, 2}."
+            msg = f"Invalid value. TimeUnit `figure` must be in {0, 1, 2}."
             raise ValueError(msg)
         else:
             self.state = value
+        return self
 
     def set_verbose(self, verbose: bool):
         self.verbose = verbose

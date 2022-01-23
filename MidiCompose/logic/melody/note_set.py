@@ -28,7 +28,7 @@ class NoteSetIterator:
 
 class NoteSet:
     """
-    Set of unique `Note` objects with utility functions for generating and sampling.
+    Set of ordered unique `Note` objects with utility functions for generating and sampling.
     """
 
     def __init__(self,
@@ -67,9 +67,9 @@ class NoteSet:
                     raise ValueError(msg)
 
             if value_typeset.issubset({int}):  # sequence of integers
-                self._notes = [Note(v) for v in value]
+                self._notes = sorted([Note(v) for v in value])
             elif value_typeset.issubset({Note}):
-                self._notes = [v for v in value]
+                self._notes = sorted([v for v in value])
             elif value_typeset.issuperset({Note, int}):  # ints and Notes
                 _notes = []
                 for v in value:
@@ -77,7 +77,7 @@ class NoteSet:
                         _notes.append(Note(v))
                     elif type(v) == Note:
                         _notes.append(v)
-                self._notes = _notes
+                self._notes = sorted(_notes)
 
             else:
                 msg = "`notes` must either be a Sequence of `Note` objects, a Sequence of integers," \
@@ -96,8 +96,22 @@ class NoteSet:
         pass
 
     # TODO
-    def restrict_range(self):
-        pass
+    def truncate_range(self, a: Note, b: Note):
+        """
+        Keeps all notes in current NoteSet, but truncates outer notes given `a` and `b`.
+        """
+        if not isinstance(a,Note) and isinstance(b,Note):
+            "`a` and `b` must be `Note` objects."
+            raise KeyError()
+        if not a < b:
+            e = "`a` must be lower than `b`."
+            raise ValueError(e)
+
+        _notes = [n for n in self.notes if a <= n <= b]
+
+        self.notes = _notes
+
+        return self
 
     #### UTILITY METHODS ####
 
@@ -105,7 +119,7 @@ class NoteSet:
                       start: Optional[Note] = None,
                       random_seed: Optional[int] = None,
                       _cycle: bool = True,
-                      _cycle_start: bool = False) -> np.ndarray:
+                      _cycle_start: bool = False) -> List[Note]:
         """
         Returns randomly selected sample (no replacement) from `NoteSet`.
 
@@ -132,20 +146,21 @@ class NoteSet:
         else:
             _seed = random_seed
 
-        # validate starting note
+        # validate starting item
         if start is None:
             _start = None
             _set_start_removed = None
             _cycle_start = None
         else:
             if start not in self.notes:
-                msg = "The note given for `start` is not in the NoteSet."
+                msg = "The item given for `start` is not in the NoteSet."
                 raise ValueError(msg)
             else:
                 _start = start
 
-                idx_start_removed = np.where(self.notes != _start)[0]
-                _set_start_removed = self.notes[idx_start_removed]
+                idx_start_removed = [n for n in range(len(self.notes))
+                                     if n != self.notes.index(_start)]
+                _set_start_removed = [self.notes[i] for i in idx_start_removed]
 
                 _cycle_start = _cycle_start
 
@@ -159,13 +174,13 @@ class NoteSet:
                 else:
                     n_cycles, remainder = divmod(_size, len(self))
                     if _start is not None:
-                        if _cycle_start:  # use same starting note each cycle
+                        if _cycle_start:  # use same starting item each cycle
                             for _ in range(n_cycles):
                                 _sample.append(_start)
                                 _sample.extend(np.random.choice(_set_start_removed,
                                                                 size=len(self) - 1,
                                                                 replace=False))
-                        else:  # enforce starting note only first cycle
+                        else:  # enforce starting item only first cycle
                             _sample.append(_start)
                             _sample.extend(np.random.choice(_set_start_removed,
                                                             size=len(self) - 1,
@@ -196,11 +211,11 @@ class NoteSet:
                     _sample.append(_start)
                     _sample.extend(np.random.choice(_set_start_removed, size=_size - 1, replace=False))
 
-        return np.array(_sample)
+        return list(_sample)
 
     def random_select(self, random_seed: Optional[int] = None) -> Note:
         """
-        Randomly select one note from NoteSet.
+        Randomly select one item from NoteSet.
         """
         if random_seed is not None:
             with temp_seed(random_seed):
@@ -248,7 +263,28 @@ class NoteSet:
 
         self.notes = _notes
 
-        return self.notes
+        return self
+
+    def from_range(self, a: Note, b: Note):
+        """Get all notes between `a` and `b`. Inclusive."""
+
+        if not isinstance(a,Note) and isinstance(b,Note):
+            "`a` and `b` must be `Note` objects."
+            raise KeyError()
+        if not a < b:
+            e = "`a` must be lower than `b`."
+            raise ValueError(e)
+
+        _notes = [Note(v) for v in list(range(a.value,b.value+1))]
+        self.notes = _notes
+
+        return self
+
+
+
+
+
+
 
     #### SPECIAL METHODS ####
     def __getitem__(self, item: int) -> Note:
@@ -274,3 +310,5 @@ class NoteSet:
             r += ", ".join([n.as_letter(accidental=self.accidental) for n in self.notes])
             r += ")"
         return r
+
+
