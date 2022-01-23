@@ -4,20 +4,18 @@ from MidiCompose.logic.harmony.note import Note
 
 
 #### INITIALIZATION ####
-
-
 @pytest.mark.parametrize(
-    ["note", "expected_value"],
+    ["item", "expected_value"],
     [
         (60, 60),
         ("C3", 60),
         ("D#6", 99),
-        ("Db-1",13)
-    ]
-)
-def test_constructor(note, expected_value):
+        ("Db-1",13),
+        ("C",0)
+    ])
+def test_constructor(item, expected_value):
 
-    n = Note(note=note)
+    n = Note(note=item)
 
     assert n.value == expected_value
 
@@ -27,23 +25,23 @@ def test_constructor(note, expected_value):
 
 
 @pytest.mark.parametrize(
-    ["note","accidental","expected"],
+    ["item","accidental","expected"],
     [
         (Note(60),None,"C3"),
         (Note("Db4"),"sharp","C#4"),
         (Note("F#6"),None,"Gb6")
     ]
 )
-def test_as_letter(note,accidental,expected):
+def test_as_letter(item,accidental,expected):
 
-    assert note.as_letter(accidental) == expected
+    assert item.as_letter(accidental) == expected
 
 
 #### SPECIAL METHODS ####
 
 
 @pytest.mark.parametrize(
-    ["note","equivalent"],
+    ["item","equivalent"],
     [
         (Note(60),60),
         (Note(65),Note(65)),
@@ -51,35 +49,35 @@ def test_as_letter(note,accidental,expected):
         (Note("C#0"),Note(25))
     ]
 )
-def test_eq(note,equivalent):
-    assert note == equivalent
+def test_eq(item, equivalent):
+    assert item == equivalent
 
 
 @pytest.mark.parametrize(
-    ["note","comparison","less","greater"],
+    ["item","comparison","less","greater"],
     [
         (Note(60),Note(59),False,True),
         (Note(60),61,True,False),
         (Note(60),60,False,False)
     ]
 )
-def test_lt_gt(note,comparison,less,greater):
+def test_lt_gt(item, comparison, less, greater):
 
-    assert (note < comparison) is less
-    assert (note > comparison) is greater
+    assert (item < comparison) is less
+    assert (item > comparison) is greater
 
 
 @pytest.mark.parametrize(
-    ["note","comparison","less_or_equal","greater_or_equal"],
+    ["item","comparison","less_or_equal","greater_or_equal"],
     [
         (Note(60),60,True,True),
         (Note(60),61,True,False),
         (Note(60),Note(59),False,True)
     ]
 )
-def test_le_ge(note,comparison,less_or_equal,greater_or_equal):
+def test_le_ge(item, comparison, less_or_equal, greater_or_equal):
 
-    assert (note <= comparison) is less_or_equal
-    assert (note >= comparison) is greater_or_equal
+    assert (item <= comparison) is less_or_equal
+    assert (item >= comparison) is greater_or_equal
 
 

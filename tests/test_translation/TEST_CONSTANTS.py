@@ -12,7 +12,7 @@ from MidiCompose.logic.rhythm.part import Part
 from MidiCompose.logic.harmony.note import Note
 
 from MidiCompose.logic.melody.note_set import NoteSet
-from MidiCompose.logic.melody import NOTE_SETS
+from MidiCompose.logic.melody import scale
 
 
 @dataclass
@@ -46,8 +46,8 @@ ofn_expected_1 = OfnExpected(n_messages=2, off_timedelta=50, off_note=60, off_ch
                              on_timedelta=0, on_note=64, on_velocity=64)
 
 #### NOTESET OBJECTS ####
-noteset_c_major = NoteSet.from_scale(tonic=Note("C3"),
-                                     scale=NOTE_SETS.DiatonicModes.MAJOR)
+noteset_c_major = NoteSet().from_scale(tonic=Note("C3"),
+                                       scale=scale.DiatonicModes.MAJOR, )
 ic(noteset_c_major)
 
 #### MEASURE/MELODY PAIRS ####

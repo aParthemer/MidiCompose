@@ -38,21 +38,20 @@ def test_constructor(notes):
         (mo.mel_60_62_64,[60,60],ValueError)  # invalid size
     ]
 )
-def test_velocity_setter(melody: Melody, velocity, error):
+def test_velocity_setter(melodies, velocity, error):
 
     if error is not None:
         with pytest.raises(error):
-            melody.velocity = velocity
+            melodies.velocity = velocity
 
     else:
+        melodies.velocity = velocity
 
-        melody.velocity = velocity
-
-        assert isinstance(melody.velocity, np.ndarray)
-        assert melody.velocity.size == len(melody)
+        assert isinstance(melodies.velocity, np.ndarray)
+        assert melodies.velocity.size == len(melodies)
 
         if isinstance(velocity,collections.Sequence):  # doesn't apply to single integers
-            assert set(melody.velocity) == set(velocity)
+            assert set(melodies.velocity) == set(velocity)
 
 
     pass

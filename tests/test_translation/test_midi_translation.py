@@ -35,17 +35,4 @@ def test_ofn(kwargs,expected):
     assert on_msg.channel == expected.on_channel
 
 
-@pytest.mark.parametrize(
-    ["rhythmic_container","melodies"],
-    [(TC.measure_ends_0,TC.melody_meas_ends_0),
-     (TC.measure_starts_2,TC.melody_meas_starts_2)],
-)
-def test_translate_mono_melody(rhythmic_container,melody):
-
-    messages = mt.translate_mono_melody(rhythmic_container,
-                                        mono_melody=melody,
-                                        tpb=480)
-
-    ic(messages)
-
 

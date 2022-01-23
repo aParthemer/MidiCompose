@@ -194,7 +194,7 @@ class MidInfo:
         """
         Return only tracks which contain note_vals
 
-        :param strip : if True, remove all non-note messages from track
+        :param strip : if True, remove all non-item messages from track
         """
 
         note_tracks = list()

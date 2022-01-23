@@ -7,7 +7,7 @@ def test_constructor_hs():
 
     interval = Interval(0)
     assert interval.hs == 0
-    assert interval.string == "P0"
+    assert interval.string == "P1"
 
     interval = Interval(3)
     assert interval.hs == 3
@@ -45,6 +45,13 @@ def test_constructor_string():
     assert interval.value == 3
     assert interval.octave_shift == 2
 
+    interval = Interval("P1")
+    assert interval.string == "P1"
+    assert interval.hs == 0
+    assert interval.quality == "P"
+    assert interval.value == 1
+    assert interval.octave_shift == 0
+
 
     with pytest.raises(ValueError):
         invalid_strings = ["A","Bb","U-","P5-"]
@@ -52,7 +59,7 @@ def test_constructor_string():
 
 def test_above_and_below():
     """
-    Supports comparison between integers AND other Note objects.
+    Supports comparison between integers AND key Note objects.
     """
 
     # pass an integer
@@ -66,4 +73,9 @@ def test_above_and_below():
     assert Interval("P4").above(note) == 65 == Note(65)
     assert type(Interval("P4").above(note)) == Note
     assert Interval("P4").below(note) == 55 == Note(55)
-    # assert Interval("P4").below(note)
+    # assert Interval("P4").steps_below(item)
+
+def test_from_get_staticmethod():
+
+    i = Interval.get(quality="M",value=3)
+    assert i == Interval("M3")

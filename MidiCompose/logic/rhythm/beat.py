@@ -1,5 +1,5 @@
-import copy
-from typing import Union, Iterable, Collection, Optional
+from copy import deepcopy
+from typing import Union, Iterable, Collection, Optional, List
 
 import numpy as np
 
@@ -49,7 +49,7 @@ class Beat:
         self.verbose = verbose
 
     @property
-    def time_units(self):
+    def time_units(self) -> List[TimeUnit]:
         return self._time_units
 
     @time_units.setter
@@ -83,7 +83,7 @@ class Beat:
     @property
     def state(self) -> np.ndarray:
         """
-        1d numeric array representing the state of each TimeUnit in the Beat.
+        1d numeric array representing the figure of each TimeUnit in the Beat.
         """
         state = np.empty(shape=(self.subdivision + 2,), dtype=np.int8)
         state[:2] = [-3, self.subdivision]
@@ -118,7 +118,7 @@ class Beat:
                   state: Collection[int],
                   override: bool = False):
         """
-        Set the `state` of the time_units instance to collection of either 0,1 or 2.
+        Set the `figure` of the time_units instance to collection of either 0,1 or 2.
 
         Automatically updates `time_units` attribute.
 
@@ -128,11 +128,13 @@ class Beat:
         valid_state_set = {0, 1, 2}
         given_state_set = set(state)
         if not given_state_set.issubset(valid_state_set):
-            msg = "Parameter `state` takes a collection containing only integers 0,1 and 2."
+            msg = "Parameter `figure` takes a collection containing only integers 0,1 and 2."
             raise AttributeError(msg)
 
         # PICKUP HERE -- SEE FAILING TEST
         self.time_units = state  # calls setter method
+
+        return self
 
     def activate_random(self,
                         density: float,
@@ -141,26 +143,34 @@ class Beat:
         :param density: float between 0 and 1 representing the density of activation.
         :param random_seed: Provide a random random_seed for reproducibility.
         """
+        _beat = deepcopy(self)
+
         if random_seed is not None:
             with temp_seed(random_seed):
                 choices = np.random.choice(a=[0, 1],
-                                           size=self.subdivision,
+                                           size=_beat.subdivision,
                                            p=[1 - density, density])
 
-                [tu.set_state(c) for tu, c in zip(self.time_units, choices)]
+                [tu.set_state(c) for tu, c in zip(_beat.time_units, choices)]
         else:
             choices = np.random.choice(a=[0, 1],
-                                       size=self.subdivision,
+                                       size=_beat.subdivision,
                                        p=[1 - density, density])
-            [tu.set_state(c) for tu, c in zip(self.time_units, choices)]
+            [tu.set_state(c) for tu, c in zip(_beat.time_units, choices)]
+
+        return _beat
 
     def sustain_all(self):
         """
         Convert all "note_off" events to sustain events (ie change all 0s to 2).
         """
-        idx_off = np.where(self.state[2:] == 0)[0]
+        _beat = deepcopy(self)
+
+        idx_off = np.where(_beat.state[2:] == 0)[0]
         for idx in idx_off:
-            self.time_units[idx].sustain()
+            _beat.time_units[idx].sustain()
+
+        return _beat
 
     def shorten_all(self):
         """
@@ -170,18 +180,33 @@ class Beat:
         for idx in idx_sustain:
             self.time_units[idx].deactivate()
 
+    #### GENERATOR METHODS ####
+
+    def get_complement(self):
+        """
+        Returns new `Beat` instance which is complement of "attack".
+
+        ie. all "sustain" is stripped.
+        """
+        _time_units = deepcopy(self._time_units)
+        _tu_complement = [tu.toggle() for tu in _time_units]
+
+        complement = Beat(_tu_complement)
+
+        return complement
+
     #### MAGIC METHODS ####
 
     def __iter__(self):
         return BeatIterator(self)
 
-    def __getitem__(self, item) -> TimeUnit:
-        return self.state[item + 2]
+    def __getitem__(self, item: int) -> TimeUnit:
+        return self.time_units[item]
 
     def __mul__(self, number: int):
         copies = []
         for _ in range(number):
-            copies.append(copy.deepcopy(self))
+            copies.append(deepcopy(self))
         return copies
 
     def __len__(self):

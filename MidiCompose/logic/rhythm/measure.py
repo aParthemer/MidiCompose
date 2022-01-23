@@ -1,6 +1,8 @@
-from typing import Union, Collection, Optional, List
+from typing import Union, Collection, Optional, List, Sequence
+from copy import deepcopy, copy
 
 import numpy as np
+from icecream import ic
 
 from MidiCompose.logic.rhythm.beat import Beat
 from MidiCompose.utilities import temp_seed
@@ -55,37 +57,38 @@ class Measure:
     def beats(self, value):
 
         if value is None:  # initialize empty measure
-            value = [Beat()]
-
-        value_type_set = set([type(b) for b in value])
-
-        beat_set = {Beat}
-        int_set = {int}
-        col_of_ints_set = {Collection}
-        mixed_set = {Beat, int}
-
-        # collection of collections of integers
-        coll_of_colls = all([issubclass(type(b), Collection) for b in value])
-        if coll_of_colls:
-            self._beats = [Beat(c) for c in value]
-
-        # contains only Beats -- no validation needed
-        elif value_type_set.issubset(beat_set):
-            self._beats = [v for v in value]
-
-        # contains only integers -- validated by Beat constructor
-        elif value_type_set.issubset(int_set):
-            self._beats = [Beat(a) for a in value]
-
-        # contains mixture Beat and int -- validated by Beat constructor
+            self._beats = []
         else:
-            _beats = []
-            for b in value:
-                if type(b) == int:
-                    _beats.append(Beat(b))
-                else:
-                    _beats.append(b)
-            self._beats = _beats
+
+            value_type_set = set([type(b) for b in value])
+
+            beat_set = {Beat}
+            int_set = {int}
+            col_of_ints_set = {Collection}
+            mixed_set = {Beat, int}
+
+            # collection of collections of integers
+            coll_of_colls = all([issubclass(type(b), Collection) for b in value])
+            if coll_of_colls:
+                self._beats = [Beat(c) for c in value]
+
+            # contains only Beats -- no validation needed
+            elif value_type_set.issubset(beat_set):
+                self._beats = [v for v in value]
+
+            # contains only integers -- validated by Beat constructor
+            elif value_type_set.issubset(int_set):
+                self._beats = [Beat(a) for a in value]
+
+            # contains mixture Beat and int -- validated by Beat constructor
+            else:
+                _beats = []
+                for b in value:
+                    if type(b) == int:
+                        _beats.append(Beat(b))
+                    else:
+                        _beats.append(b)
+                self._beats = _beats
 
     @property
     def n_beats(self):
@@ -94,7 +97,7 @@ class Measure:
     @property
     def state(self):
         """
-        1-d numeric array containing state of each time_units in Measure.
+        1-d numeric array containing figure of each time_units in Measure.
         """
         beat_states = np.concatenate([b.state for b in self.beats])
         state = np.empty(shape=(beat_states.size + 1,), dtype=np.int8)
@@ -105,7 +108,7 @@ class Measure:
     @property
     def active_state(self) -> np.ndarray:
         """
-        Same as `state` array but without beat/measure flags.
+        Same as `figure` array but without beat/measure flags.
         """
         return np.concatenate([b.active_state for b in self.beats])
 
@@ -140,10 +143,10 @@ class Measure:
                   override: bool = True,
                   reshape: bool = False):
         """
-        Sets `state` array as well as `beats` array.
+        Sets `figure` array as well as `beats` array.
 
         :param override: If False, will raise exception if trying to override a stateful measure.
-        :param reshape: If False, will raise exception if `state` argument would result in "reshaping" the measure (ie.
+        :param reshape: If False, will raise exception if `figure` argument would result in "reshaping" the measure (ie.
         changing the number of beats, or number of subdivisions in a time_units.)
         """
         self.beats = state
@@ -152,23 +155,36 @@ class Measure:
                         random_seed: Optional[int] = None,
                         beat_idx: Optional[Collection[int]] = None):
 
+        beats = deepcopy(self.beats)
+        _beats = []
         if random_seed is not None:
             with temp_seed(random_seed):
                 if beat_idx is not None:
-                    for i in beat_idx:
-                        self.beats[i].activate_random(density, random_seed + i)
+                    for i,b in enumerate(beats):
+                        if i in beat_idx:
+                            _b = beats[i].activate_random(density, random_seed + i)
+                            _beats.append(_b)
+                        else:
+                            _beats.append(b)
                 elif beat_idx is None:
-                    [b.activate_random(density, random_seed + i) for i,b in enumerate(self.beats)]
+                    _beats = [b.activate_random(density, random_seed + i) for i,b in enumerate(beats)]
         else:
             if beat_idx is not None:
-                for i in beat_idx:
-                    self.beats[i].activate_random(density, random_seed)
+                for i,b in enumerate(beats):
+                    if i in beat_idx:
+                        _beats.append(beats[i].activate_random(density, random_seed))
+                    else:
+                        _beats.append(b)
+
             elif beat_idx is None:
-                [b.activate_random(density, random_seed) for b in self.beats]
+                _beats = [b.activate_random(density, random_seed) for b in beats]
+
+        _measure = Measure(_beats)
+        return _measure
 
     def sustain_all(self, beat_idx: Optional[Collection[int]] = None):
         """
-        Convert all "note-off" events to "sustain" events.
+        Convert all "item-off" events to "sustain" events.
         :param beat_idx: If given, only apply to the given beats.
         """
         if beat_idx is not None:
@@ -181,6 +197,8 @@ class Measure:
         else:
             for b in self.beats:
                 b.sustain_all()
+
+        return self
 
     def shorten_all(self, beat_idx: Optional[Collection[int]] = None):
         """
@@ -199,6 +217,22 @@ class Measure:
             for b in self.beats:
                 b.shorten_all()
 
+        return self
+
+    #### GENERATOR FUNCTIONS ####
+
+    def get_complement(self, beat_idx:Optional[Sequence[int]] = None) -> Beat():
+
+        _beats = self.beats
+        if beat_idx is not None:
+            e = "Implement beat indexing!"
+            raise NotImplementedError(e)
+
+        else:
+            complement = Measure([b.get_complement() for b in _beats])
+
+        return complement
+
     #### MAGIC METHODS ####
 
     def __iter__(self):
@@ -207,17 +241,21 @@ class Measure:
     def __getitem__(self, item: int) -> Beat:
         return self.beats[item]
 
+    def __mul__(self,number: int) -> list:
+        return [deepcopy(self) for _ in range(number)]
+
     def __len__(self):
         return len(self.beats)
 
     def __repr__(self):
-        header = "Measure(["
-        r = ""
-        beats = [str(b) for b in self.beats]
-        for i,b in enumerate(beats):
-            if i == 0:
-                r += header + b
+        r = "Measure("
+        beat_strs = [str(b.active_state) for b in self.beats]
+        for i,b in enumerate(beat_strs):
+            if i < len(beat_strs) - 1:
+                r += b + ", "
             else:
-                r += "\n" + " "*len(header) + b
-        r += "])"
+                r += b + ")"
         return r
+
+
+

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List, Union, Optional, Sequence
 
 import numpy as np
@@ -5,6 +6,7 @@ from numpy.typing import ArrayLike
 
 from MidiCompose.logic.harmony.note import Note
 import collections
+
 
 class MelodyIterator:
 
@@ -29,7 +31,7 @@ class Melody:
 
     def __init__(self,
                  notes: Optional[Union[Sequence[Note], Sequence[int]]] = None,
-                 velocity: Union[int,Sequence[int]] = 64):
+                 velocity: Union[int, Sequence[int]] = 64):
         """
 
         :param notes:
@@ -39,7 +41,7 @@ class Melody:
 
         self.notes = notes  # calls setter
 
-        self.velocity = velocity # calls setter
+        self.velocity = velocity  # calls setter
 
     @property
     def notes(self) -> List[Note]:
@@ -72,47 +74,42 @@ class Melody:
             raise ValueError(msg)
 
     @property
-    def velocity(self) -> np.ndarray:
+    def velocity(self) -> List[int]:
         return self._velocity
 
     @velocity.setter
-    def velocity(self,value):
+    def velocity(self, value):
 
         _velocity = None
         # if single integer
-        if isinstance(value,int):
-            _velocity = np.full(shape=len(self),fill_value=value)
+        if isinstance(value, int):
+            _velocity = [value for _ in range(len(self))]
 
-        # if numpy array
-        elif isinstance(value,np.ndarray):
-            if not value.shape == (len(self),):  # invalid size
-                msg = f"`self.velocity` must either be a single integer, or a Sequence of integers with" \
-                      f"size equal to the number of notes in `self.notes`."
-                raise ValueError(msg)
-            elif not ((value >= 0) & (value <= 127)).all():  # invalid range
-                msg = f"`velocity` must be in range (0,127)"
-                raise ValueError(msg)
-            else:
-                _velocity = value
+        # sequence of integers
+        elif isinstance(value, Sequence):
 
-        # if sequence of integers
-        elif isinstance(value,collections.Sequence):
             if not len(value) == len(self):  # invalid size
                 msg = f"`self.velocity` must either be a single integer, or a Sequence of integers with" \
                       f"size equal to the number of notes in `self.notes`."
                 raise ValueError(msg)
-            elif set([type(v) for v in value]) != {int}:  # not all integers
-                msg = "`self.velocity` can only take integer values."
+            elif not all([0 <= v <= 127 for v in value]):  # invalid range
+                msg = f"`velocity` must be in range (0,127)"
                 raise ValueError(msg)
-            elif not all([v in range(128) for v in value]):
-                msg = f"All values in `self.velocity` must be in range (0,127)"
-                raise ValueError(msg)
+
             else:
-                _velocity = np.array(value)
+                _velocity = list(value)
 
         self._velocity = _velocity
 
+    #### UTILITY METHODS ####
+
+    def append_note(self, note: Note, velocity: int = 64):
+        self.notes.append(note)
+        self.velocity.append(velocity)
+        return self
+
     #### MAGIC METHODS ####
+
     def __len__(self):
         return len(self.notes)
 
@@ -122,11 +119,11 @@ class Melody:
     def __iter__(self):
         return MelodyIterator(self)
 
+    def __mul__(self, other: int):
+        return [deepcopy(self) for _ in range(other)]
+
     def __repr__(self):
         r = "Melody("
-        r += ", ".join([str(n.value) for n in self.notes])
+        r += ", ".join([str(n.as_letter()) for n in self.notes])
         r += ")"
         return r
-
-
-

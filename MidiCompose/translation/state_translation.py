@@ -42,7 +42,7 @@ class ConsolidatedAttributes:
 @dataclass
 class ParallelAttributes:
     """
-    Container used for generating midi from parallel state.
+    Container used for generating midi from parallel figure.
     """
     cons_attributes: ConsolidatedAttributes
     adj_attributes: List[AdjustedAttributes]
@@ -110,11 +110,11 @@ def get_total_ticks(ticks_per_sub: np.ndarray) -> int:
 def get_timestamp(active_st: np.ndarray,
                   ticks_per_sub: np.ndarray):
     """
-    Get the array which represents the absolute timedelta for each TimeUnit in a midi-state.
+    Get the array which represents the absolute timedelta for each TimeUnit in a midi-figure.
     """
     size_st = active_st.size
 
-    # initialize empty array of size n+1 compared to active state
+    # initialize empty array of size n+1 compared to active figure
     abs_time = np.zeros(shape=(size_st + 1,), dtype=int)
     abs_time[1:] = np.cumsum(ticks_per_sub)
 
@@ -123,8 +123,8 @@ def get_timestamp(active_st: np.ndarray,
 
 def get_active_state_comp(active_st: np.ndarray) -> np.ndarray:
     """
-    Strips all "sustain" (2) instances from buffered state so that there's a one-to-one
-    relationship between state and timedelta attributes.
+    Strips all "sustain" (2) instances from buffered figure so that there's a one-to-one
+    relationship between figure and timedelta attributes.
     """
     return active_st[active_st != 2]
 
