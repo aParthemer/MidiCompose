@@ -4,7 +4,7 @@ import setuptools
 
 setup(
   name = 'MidiCompose',
-  version = '0.2',
+  version = '0.3',
   license='MIT',
   description = 'Library for programatically composing music using midi.',
   author = 'Alex Parthemer',
@@ -24,8 +24,6 @@ setup(
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3'
   ],
-  package_dir={"":"MidiCompose"},
-  packages=setuptools.find_packages(where="MidiCompose"),
+  packages=setuptools.find_packages(where="."),
   python_requires=">=3.6"
-
 )
