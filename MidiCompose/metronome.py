@@ -1,7 +1,6 @@
 from typing import Optional, Tuple
 
 import mido
-from icecream import ic
 
 from MidiCompose.logic.harmony.note import Note
 from MidiCompose.logic.melody.melody import Melody

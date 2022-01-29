@@ -1,18 +1,12 @@
-from dataclasses import dataclass
 from typing import Collection, Union, List, Optional, Sequence
 
 import numpy as np
-from icecream import ic
 from mido import MidiFile, MidiTrack, Message
 
 from MidiCompose.logic.harmony.note import Note
 from MidiCompose.logic.melody.melody import Melody
-from MidiCompose.logic.rhythm.beat import Beat
-from MidiCompose.logic.rhythm.measure import Measure
 from MidiCompose.logic.rhythm.part import Part
 from MidiCompose.translation import state_translation as st
-from MidiCompose.translation.state_translation import StateAttributes, ParallelAttributes
-
 
 #### OBJECTS ####
 

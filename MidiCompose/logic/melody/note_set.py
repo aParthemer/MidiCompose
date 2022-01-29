@@ -1,15 +1,11 @@
-import asynchat
 import random
 from typing import Optional, Union, Sequence, List
 
 import numpy as np
-from icecream import ic
 
 from MidiCompose.logic.harmony.note import Note
 from MidiCompose.logic.harmony.interval import Interval
 from MidiCompose.utilities import temp_seed
-
-from copy import copy
 
 
 class NoteSetIterator:
