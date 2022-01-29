@@ -89,7 +89,3 @@ if __name__ == '__main__':
     part_match = Part([Measure([[1, 0, 1, 1], [1, 2, 2, 1]]),
                        Measure([[1, 2, 2], [2, 1, 2]])])
 
-    # met = Metronome(part_match)
-
-    # ic(met.part_bell,met.part_click)
-
