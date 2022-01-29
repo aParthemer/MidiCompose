@@ -1,8 +1,7 @@
 from typing import Union, Collection, Optional, List, Sequence
-from copy import deepcopy, copy
+from copy import deepcopy
 
 import numpy as np
-from icecream import ic
 
 from MidiCompose.logic.rhythm.beat import Beat
 from MidiCompose.utilities import temp_seed

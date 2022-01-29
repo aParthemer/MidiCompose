@@ -1,6 +1,5 @@
 from typing import Union, Sequence, List, Optional
 
-import numpy as np
 from mido import Message, MidiTrack, bpm2tempo, MetaMessage
 
 from MidiCompose.logic.harmony.note import Note

@@ -1,11 +1,7 @@
 from copy import deepcopy
 from typing import List, Union, Optional, Sequence
 
-import numpy as np
-from numpy.typing import ArrayLike
-
 from MidiCompose.logic.harmony.note import Note
-import collections
 
 
 class MelodyIterator:
