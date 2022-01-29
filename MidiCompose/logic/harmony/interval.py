@@ -400,8 +400,6 @@ class IntervalRange:
         return r
 
 
-
-
 #### VALIDATORS ####
 
 def is_interval_like(interval_like) -> bool:
@@ -412,7 +410,6 @@ def is_interval_like(interval_like) -> bool:
             0 <= interval_like < 127
     ):
         return True
-
 
 def to_interval(interval_like) -> Interval:
 

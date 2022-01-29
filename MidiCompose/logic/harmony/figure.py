@@ -14,7 +14,6 @@ from MidiCompose.logic.harmony.interval import Interval, sequence_to_intervals
 from MidiCompose.logic.harmony.key import KeyFamily, to_key
 from MidiCompose.logic.harmony.note import Note, to_note, HasNotes, sequence_to_notes
 
-from MidiCompose import factories
 
 
 class BaseFigure:
@@ -244,6 +243,7 @@ class TonalFigure:
         _below = [n + 1 for n in _bf.steps_below]
 
         tf = TonalFigure(note=_note,key=_key,above=_above,below=_below)
+
         return tf
 
     def to_key(self,
