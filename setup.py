@@ -4,18 +4,19 @@ import setuptools
 
 setup(
   name = 'MidiCompose',
-  version = '0.2',
+  version = '0.3',
   license='MIT',
   description = 'Library for programatically composing music using midi.',
   author = 'Alex Parthemer',
   author_email = 'alexparthemer@gmail.com',
   url = 'https://github.com/aParthemer/MidiCompose',
-  download_url = 'https://github.com/aParthemer/MidiCompose/archive/refs/tags/v_02.tar.gz',
+  download_url = 'https://github.com/aParthemer/MidiCompose/archive/refs/tags/v_03.tar.gz',
   keywords = ["midi","python","music"],
   install_requires=[
     'numpy',
     'mido',
-    'icecream'
+    'icecream',
+    'typing-extensions'
   ],
   classifiers=[
     'Development Status :: 3 - Alpha',
@@ -24,8 +25,6 @@ setup(
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3'
   ],
-  package_dir={"":"MidiCompose"},
-  packages=setuptools.find_packages(where="MidiCompose"),
+  packages=setuptools.find_packages(where="."),
   python_requires=">=3.6"
-
 )
