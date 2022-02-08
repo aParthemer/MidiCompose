@@ -10,12 +10,13 @@ setup(
   author = 'Alex Parthemer',
   author_email = 'alexparthemer@gmail.com',
   url = 'https://github.com/aParthemer/MidiCompose',
-  download_url = 'https://github.com/aParthemer/MidiCompose/archive/refs/tags/v_02.tar.gz',
+  download_url = 'https://github.com/aParthemer/MidiCompose/archive/refs/tags/v_03.tar.gz',
   keywords = ["midi","python","music"],
   install_requires=[
     'numpy',
     'mido',
-    'icecream'
+    'icecream',
+    'typing-extensions'
   ],
   classifiers=[
     'Development Status :: 3 - Alpha',
