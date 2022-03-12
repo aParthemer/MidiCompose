@@ -1,10 +1,13 @@
+import random
 from typing import Union, Collection, Optional, List, Sequence
 from copy import deepcopy
+from itertools import chain
 
 import numpy as np
+from icecream import ic
 
 from MidiCompose.logic.rhythm.beat import Beat
-from MidiCompose.utilities import temp_seed
+from MidiCompose.utilities import temp_seed,ctx_random_seed
 
 
 class MeasureIterator:
@@ -134,6 +137,11 @@ class Measure:
         else:
             return False
 
+    @property
+    def flattened(self) -> List[int]:
+        _flattened = list(chain(*self))
+        return _flattened
+
     #### UTILITY FUNCTIONS ####
 
     # TODO: implement override/reshape checks
@@ -152,31 +160,24 @@ class Measure:
 
     def activate_random(self, density: float,
                         random_seed: Optional[int] = None,
-                        beat_idx: Optional[Collection[int]] = None):
+                        beat_idx: Sequence[int] = None):
 
         beats = deepcopy(self.beats)
-        _beats = []
-        if random_seed is not None:
-            with temp_seed(random_seed):
-                if beat_idx is not None:
-                    for i,b in enumerate(beats):
-                        if i in beat_idx:
-                            _b = beats[i].activate_random(density, random_seed + i)
-                            _beats.append(_b)
-                        else:
-                            _beats.append(b)
-                elif beat_idx is None:
-                    _beats = [b.activate_random(density, random_seed + i) for i,b in enumerate(beats)]
-        else:
-            if beat_idx is not None:
-                for i,b in enumerate(beats):
-                    if i in beat_idx:
-                        _beats.append(beats[i].activate_random(density, random_seed))
-                    else:
-                        _beats.append(b)
 
-            elif beat_idx is None:
-                _beats = [b.activate_random(density, random_seed) for b in beats]
+        _beats = []
+        with ctx_random_seed(random_seed):
+            if beat_idx is None:
+                beat_idx = list()
+
+            for i,beat in enumerate(beats):
+                if i not in beat_idx:
+                    choices = random.choices(population=[1,0],
+                                             weights=[density,1-density],
+                                             k=len(beat))
+                    _beat = Beat(choices)
+                else:
+                    _beat = beat
+                _beats.append(_beat)
 
         _measure = Measure(_beats)
         return _measure
@@ -220,17 +221,20 @@ class Measure:
 
     #### GENERATOR FUNCTIONS ####
 
-    def get_complement(self, beat_idx:Optional[Sequence[int]] = None) -> Beat():
+    def get_complement(self,
+                       adherence: float = 1.0,
+                       random_seed: Optional[int] = None,
+                       beat_idx:Optional[Sequence[int]] = None) -> Beat():
 
-        _beats = self.beats
+        raise NotImplementedError()
+
+        if adherence > 1 or adherence < 0:
+            msg = "`adherence` must be a float between 0 and 1."
+            raise ValueError(msg)
+
         if beat_idx is not None:
             e = "Implement beat indexing!"
             raise NotImplementedError(e)
-
-        else:
-            complement = Measure([b.get_complement() for b in _beats])
-
-        return complement
 
     #### MAGIC METHODS ####
 

@@ -14,3 +14,6 @@ def play_mid(mid: MidiFile, port_name: str = "loopMIDI Port 1") -> None:
     finally:
         if port:
             port.close()
+
+if __name__ == '__main__':
+    print(mido.get_output_names())

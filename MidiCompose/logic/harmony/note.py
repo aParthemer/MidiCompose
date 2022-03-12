@@ -7,7 +7,7 @@ from icecream import ic
 from typing_extensions import runtime_checkable, Protocol
 
 from MidiCompose.logic.harmony import note_mapping as nm
-from MidiCompose.utilities import temp_seed, random_seed
+from MidiCompose.utilities import temp_seed, ctx_random_seed
 
 
 class Note:
@@ -147,7 +147,7 @@ class Note:
         elif selection_criteria == "highest":
             note = notes_in_range[-1]
         elif selection_criteria == "random":
-            with random_seed(seed):
+            with ctx_random_seed(seed):
                 note = random.choice(notes_in_range)
 
         return note
