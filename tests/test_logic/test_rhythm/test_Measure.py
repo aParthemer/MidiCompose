@@ -72,9 +72,3 @@ def test_shorten_all():
     pass
 
 
-# TODO
-def test_activate_random():
-    # with random random_seed
-
-    # without random random_seed
-    pass

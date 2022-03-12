@@ -1,10 +1,11 @@
 from copy import deepcopy
 from typing import Union, Iterable, Collection, Optional, List
+import random
 
 import numpy as np
 
 from MidiCompose.logic.rhythm.time_unit import TimeUnit
-from MidiCompose.utilities import temp_seed
+from MidiCompose.utilities import temp_seed, ctx_random_seed
 
 
 class BeatIterator:
@@ -182,16 +183,38 @@ class Beat:
 
     #### GENERATOR METHODS ####
 
-    def get_complement(self):
+    def get_complement(self,
+                       adherence: float = 1.0,
+                       random_seed: Optional[int] = None):
         """
         Returns new `Beat` instance which is complement of "attack".
 
         ie. all "sustain" is stripped.
-        """
-        _time_units = deepcopy(self._time_units)
-        _tu_complement = [tu.toggle() for tu in _time_units]
 
-        complement = Beat(_tu_complement)
+        Params:
+        - adherence (str) : ...
+        """
+
+        if adherence < 0 or adherence > 1:
+            msg = "`Adherence` must be a float between 0 and 1"
+            raise ValueError(msg)
+
+        _time_units = deepcopy(self._time_units)
+
+        with ctx_random_seed(random_seed):
+            _adherence = random.choices([0,1],
+                                        weights=[1-adherence,adherence],
+                                        k=len(_time_units))
+
+        _complement = []
+        for tu,adhere in zip(_time_units,_adherence):
+            if adhere == 1:
+                _tu = tu.toggle()
+            else:
+                _tu = tu
+            _complement.append(_tu)
+
+        complement = Beat(_complement)
 
         return complement
 

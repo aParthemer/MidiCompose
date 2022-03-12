@@ -22,7 +22,7 @@ from MidiCompose.translation.track_builder import TrackBuilder
 
 from MidiCompose.playback import play_mid
 
-from MidiCompose.utilities import random_seed
+from MidiCompose.utilities import ctx_random_seed
 
 
 

@@ -1,9 +1,16 @@
+from __future__ import annotations
+
 from copy import deepcopy
 from typing import Collection, Optional, List, Sequence
+import random
 
 import numpy as np
+from icecream import ic
 
 from MidiCompose.logic.rhythm.measure import Measure
+from MidiCompose.logic.rhythm.measure import Beat
+
+from MidiCompose.utilities import ctx_random_seed
 
 
 class PartIterator:
@@ -75,6 +82,46 @@ class Part:
 
         self.measures.append(measure)
         return self
+
+    def activate_random(self,
+                        density: float,
+                        random_seed: int = None,
+                        measure_idx: Sequence[int] = None) -> Part:
+
+        if measure_idx is None:
+            measure_idx = list()
+
+        _measures = []
+        with ctx_random_seed(seed=random_seed):
+            for i, measure in enumerate(self.measures):
+                if i in measure_idx:
+                    _measure = measure
+                else:
+                    _n_beats = measure.n_beats
+                    _sub_values = list(measure.subdivision_values)
+                    ic(_sub_values)
+
+                    choices = random.choices([1,0],
+                                             weights=[density,1-density],
+                                             k=sum(_sub_values))
+                    ic(choices)
+
+                    _beats = []
+                    idx = 0
+                    for sub_val in _sub_values:
+                        _beats.append(Beat(choices[idx:sub_val+1]))
+                        idx += sub_val
+                    _measure = Measure(_beats)
+                _measures.append(_measure)
+
+        return Part(_measures)
+
+
+
+
+
+
+
 
     #### GENERATOR METHODS ####
 
