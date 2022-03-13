@@ -84,7 +84,7 @@ class Beat:
     @property
     def state(self) -> np.ndarray:
         """
-        1d numeric array representing the figure of each TimeUnit in the Beat.
+        1d numeric array representing the value of each TimeUnit in the Beat.
         """
         state = np.empty(shape=(self.subdivision + 2,), dtype=np.int8)
         state[:2] = [-3, self.subdivision]
@@ -119,7 +119,7 @@ class Beat:
                   state: Collection[int],
                   override: bool = False):
         """
-        Set the `figure` of the time_units instance to collection of either 0,1 or 2.
+        Set the `value` of the time_units instance to collection of either 0,1 or 2.
 
         Automatically updates `time_units` attribute.
 
@@ -129,7 +129,7 @@ class Beat:
         valid_state_set = {0, 1, 2}
         given_state_set = set(state)
         if not given_state_set.issubset(valid_state_set):
-            msg = "Parameter `figure` takes a collection containing only integers 0,1 and 2."
+            msg = "Parameter `value` takes a collection containing only integers 0,1 and 2."
             raise AttributeError(msg)
 
         # PICKUP HERE -- SEE FAILING TEST
