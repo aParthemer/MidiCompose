@@ -11,7 +11,7 @@ from tests.test_translation import TEST_CONSTANTS as TC
 
 #### MESSAGE PROTOCOLS ###
 @pytest.mark.parametrize(
-    ["kwargs","expected"],
+    ["constructor_kwargs","expected"],
     [
         (TC.ofn_kwargs_1,TC.ofn_expected_1)
     ]

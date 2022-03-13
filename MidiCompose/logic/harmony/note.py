@@ -21,7 +21,7 @@ class Note:
         Integer value representing midi-note.
 
     signature : `int`
-        Integer value of midi-note
+        Integer value of midi-note, compressed to the bottom octave.
     """
 
     def __init__(self, note: Union[int, str], accidental: Optional[str] = None):
