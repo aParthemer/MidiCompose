@@ -3,18 +3,18 @@ from itertools import groupby
 
 from MidiCompose.logic.harmony.figure import AbstractBaseFiguredNote, TonalFiguredNote, BaseFiguredNote, ChromaticFiguredNote
 from MidiCompose.logic.harmony.interval import Interval
-from MidiCompose.logic.harmony.key import KeyFamily
+from MidiCompose.logic.harmony.key import Key
 from MidiCompose.logic.harmony.note import Note
 
 @pytest.mark.parametrize(
     argnames="kwargs",
     argvalues=[
         {
-            "constructor":{"note":"C3","figure":(5,3,3),"index":0},
-            "validation":{"note":Note("C3"),"figure":[0,3,5],"index":0},
+            "constructor":{"from_note":"C3","figure":(5,3,3),"index":0},
+            "validation":{"from_note":Note("C3"),"figure":[0,3,5],"index":0},
         },
         {
-            "constructor":{"note":"C3","figure":[0,5,10],"index":3},
+            "constructor":{"from_note":"C3","figure":[0,5,10],"index":3},
             "error":ValueError
         }
     ]
@@ -36,12 +36,12 @@ def test_BaseFiguredNote(kwargs):
     argnames="kwargs",
     argvalues=[
         {
-            "constructor":{"note":"C3","figure":(5,3,3),"index":0},
-            "validation":{"note":Note("C3"),"figure":[0,3,5],"index":0,
+            "constructor":{"from_note":"C3","figure":(5,3,3),"index":0},
+            "validation":{"from_note":Note("C3"),"figure":[0,3,5],"index":0,
                           "bass":Note("C3"),"notes":[Note(n) for n in (60,63,65)]},
         },
         {
-            "constructor":{"note":60,"figure":[0,5,9],"index":3},
+            "constructor":{"from_note":60,"figure":[0,5,9],"index":3},
             "error":ValueError
         }
     ]
@@ -64,12 +64,12 @@ def test_ChromaticFiguredNote(kwargs):
     argnames="kwargs",
     argvalues=[
         {
-            "constructor":{"note":"C3","figure":(5,3,3),"index":1,"key":"C"},
-            "validation":{"note":Note("C3"),"figure":[0,3,5],"index":1,
+            "constructor":{"from_note":"C3","figure":(5,3,3),"index":1,"key":"C"},
+            "validation":{"from_note":Note("C3"),"figure":[0,3,5],"index":1,
                           "bass":Note("A2"),"notes":[Note(n) for n in ("A2","C3","E3")]},
         },
         {
-            "constructor":{"note":"C3","figure":[0,5,9],"index":0,"key":"D"},
+            "constructor":{"from_note":"C3","figure":[0,5,9],"index":0,"key":"D"},
             "error":ValueError
         }
     ]

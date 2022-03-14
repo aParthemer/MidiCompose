@@ -6,8 +6,8 @@ from MidiCompose.logic.harmony.chord import Chord
 from MidiCompose.logic.harmony.chord_sequence import ChordSequence
 from MidiCompose.logic.harmony.interval import Interval
 from MidiCompose.logic.harmony.interval import IntervalRange
-from MidiCompose.logic.harmony.key import KeyFamily, Mode, ModeEnum
-from MidiCompose.logic.harmony.figure import AbstractBaseFiguredNote, TonalFiguredNote
+from MidiCompose.logic.harmony.key import Key
+from MidiCompose.logic.harmony.figure import TonalFiguredNote, ChromaticFiguredNote
 
 from MidiCompose.logic.melody.melody import Melody
 from MidiCompose.logic.melody.note_set import NoteSet

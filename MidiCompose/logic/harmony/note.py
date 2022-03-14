@@ -11,17 +11,17 @@ from MidiCompose.utilities import temp_seed, ctx_random_seed
 
 
 class Note:
-    """Represents a midi-value note.
+    """Represents a midi-value from_note.
 
-    A midi note is Fundamentally represented by an integer between 0 and 127.
+    A midi from_note is Fundamentally represented by an integer between 0 and 127.
 
     Attributes
     ----
     value : `int`
-        Integer value representing midi-note.
+        Integer value representing midi-from_note.
 
     signature : `int`
-        Integer value of midi-note, compressed to the bottom octave.
+        Integer value of midi-from_note, compressed to the bottom octave.
     """
 
     def __init__(self, note: Union[int, str], accidental: Optional[str] = None):
@@ -68,7 +68,7 @@ class Note:
     @property
     def signature(self) -> int:
         """
-        Returns the integer "signature" of the note, regardless of range.
+        Returns the integer "signature" of the from_note, regardless of range.
 
         That is {C-2,C0,C4,...} = 0
         """
@@ -95,7 +95,7 @@ class Note:
 
     def to_register(self, register: int):
         """
-        Returns the same note in the specified range.
+        Returns the same from_note in the specified range.
 
         :param register: Integer between (-2,8)
         """
