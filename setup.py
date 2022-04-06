@@ -9,8 +9,8 @@ setup(
     description='Library for programatically composing music using midi.',
     author='Alex Parthemer',
     author_email='alexparthemer@gmail.com',
-    url='https://github.com/aParthemer/compositional',
-    download_url='https://github.com/aParthemer/compositional/archive/refs/tags/v_005.tar.gz',
+    url='https://github.com/aParthemer/MidiCompose',
+    download_url='https://github.com/aParthemer/MidiCompose/archive/refs/tags/v_005.tar.gz',
     keywords=["midi", "python", "music"],
     install_requires=[
         'numpy',
