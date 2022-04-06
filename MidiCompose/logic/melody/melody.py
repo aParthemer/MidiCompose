@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import List, Union, Optional, Sequence
 
-from compositional.logic.harmony.note import Note
+from MidiCompose.logic.harmony.note import Note
 
 
 class MelodyIterator:

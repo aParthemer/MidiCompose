@@ -1,6 +1,6 @@
 from icecream import ic
 
-from compositional.utilities import TwoWayDict
+from MidiCompose.utilities import TwoWayDict
 
 HS_INTERVAL_DICT = {
     0: 'P1',

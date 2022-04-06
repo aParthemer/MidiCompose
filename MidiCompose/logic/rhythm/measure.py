@@ -6,8 +6,8 @@ from itertools import chain
 import numpy as np
 from icecream import ic
 
-from compositional.logic.rhythm.beat import Beat
-from compositional.utilities import temp_seed,ctx_random_seed
+from MidiCompose.logic.rhythm.beat import Beat
+from MidiCompose.utilities import temp_seed,ctx_random_seed
 
 
 class MeasureIterator:

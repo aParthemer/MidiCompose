@@ -7,10 +7,10 @@ import random
 import numpy as np
 from icecream import ic
 
-from compositional.logic.rhythm.measure import Measure
-from compositional.logic.rhythm.measure import Beat
+from MidiCompose.logic.rhythm.measure import Measure
+from MidiCompose.logic.rhythm.measure import Beat
 
-from compositional.utilities import ctx_random_seed
+from MidiCompose.utilities import ctx_random_seed
 
 
 class PartIterator:

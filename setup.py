@@ -3,7 +3,7 @@ from distutils.core import setup
 import setuptools
 
 setup(
-    name='compositional',
+    name='MidiCompose',
     version='0.0.5',
     license='MIT',
     description='Library for programatically composing music using midi.',

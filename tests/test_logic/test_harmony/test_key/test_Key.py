@@ -1,7 +1,7 @@
 import pytest
 
-from compositional.logic.harmony.key import Key, KeySchema
-from compositional.logic.harmony.note import Note
+from MidiCompose.logic.harmony.key import Key, KeySchema
+from MidiCompose.logic.harmony.note import Note
 
 import itertools
 

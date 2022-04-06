@@ -2,10 +2,10 @@ from typing import Union, Sequence, List, Optional
 
 from mido import Message, MidiTrack, bpm2tempo, MetaMessage
 
-from compositional.logic.harmony.note import Note
-from compositional.logic.melody.melody import Melody
-from compositional.logic.rhythm.part import Part
-from compositional.translation import midi_translation as mt
+from MidiCompose.logic.harmony.note import Note
+from MidiCompose.logic.melody.melody import Melody
+from MidiCompose.logic.rhythm.part import Part
+from MidiCompose.translation import midi_translation as mt
 
 from icecream import ic as ice, ic
 

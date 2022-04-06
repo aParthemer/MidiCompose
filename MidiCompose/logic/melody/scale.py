@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from itertools import cycle
 from typing import Union, List, Tuple, Optional, Any
 
-from compositional.logic.harmony.note import Note
+from MidiCompose.logic.harmony.note import Note
 
 @dataclass
 class DiatonicModes:

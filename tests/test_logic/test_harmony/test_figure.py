@@ -1,10 +1,10 @@
 import pytest
 from itertools import groupby
 
-from compositional.logic.harmony.figure import AbstractBaseFiguredNote, TonalFiguredNote, BaseFiguredNote, ChromaticFiguredNote
-from compositional.logic.harmony.interval import Interval
-from compositional.logic.harmony.key import Key
-from compositional.logic.harmony.note import Note
+from MidiCompose.logic.harmony.figure import AbstractBaseFiguredNote, TonalFiguredNote, BaseFiguredNote, ChromaticFiguredNote
+from MidiCompose.logic.harmony.interval import Interval
+from MidiCompose.logic.harmony.key import Key
+from MidiCompose.logic.harmony.note import Note
 
 @pytest.mark.parametrize(
     argnames="kwargs",

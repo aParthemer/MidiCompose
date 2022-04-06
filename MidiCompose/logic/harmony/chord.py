@@ -5,12 +5,12 @@ from typing import Sequence, Optional, Union, List, Tuple, Any
 
 from icecream import ic
 
-import compositional.logic.harmony.note
-from compositional.logic.harmony.figure import AbstractBaseFiguredNote, TonalFiguredNote
-from compositional.logic.harmony.interval import Interval, IntervalRange
-from compositional.logic.harmony.key import Key
-from compositional.logic.harmony.note import Note, HasNotes, to_note
-from compositional.logic.melody.note_set import NoteSet
+import MidiCompose.logic.harmony.note
+from MidiCompose.logic.harmony.figure import AbstractBaseFiguredNote, TonalFiguredNote
+from MidiCompose.logic.harmony.interval import Interval, IntervalRange
+from MidiCompose.logic.harmony.key import Key
+from MidiCompose.logic.harmony.note import Note, HasNotes, to_note
+from MidiCompose.logic.melody.note_set import NoteSet
 
 
 class Chord:

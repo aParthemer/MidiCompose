@@ -3,9 +3,9 @@ from typing import Optional, Union, Sequence, List
 
 import numpy as np
 
-from compositional.logic.harmony.note import Note
-from compositional.logic.harmony.interval import Interval
-from compositional.utilities import temp_seed
+from MidiCompose.logic.harmony.note import Note
+from MidiCompose.logic.harmony.interval import Interval
+from MidiCompose.utilities import temp_seed
 
 
 class NoteSetIterator:

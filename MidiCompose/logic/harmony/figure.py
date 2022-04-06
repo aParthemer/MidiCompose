@@ -10,9 +10,9 @@ import bisect
 
 from icecream import ic
 
-from compositional.logic.harmony.interval import Interval, sequence_to_intervals
-from compositional.logic.harmony.key import Key
-from compositional.logic.harmony.note import Note, to_note, HasNotes, sequence_to_notes
+from MidiCompose.logic.harmony.interval import Interval, sequence_to_intervals
+from MidiCompose.logic.harmony.key import Key
+from MidiCompose.logic.harmony.note import Note, to_note, HasNotes, sequence_to_notes
 
 
 class AbstractBaseFiguredNote(ABC):

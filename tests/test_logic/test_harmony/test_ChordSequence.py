@@ -1,6 +1,6 @@
 import pytest
 
-from compositional.objects import Note,Chord,ChordSequence
+from MidiCompose.objects import Note,Chord,ChordSequence
 
 def test_constructor():
     valid = [

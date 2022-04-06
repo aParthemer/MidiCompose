@@ -1,6 +1,6 @@
 import pytest
 
-from compositional.logic.harmony import note_mapping as nm
+from MidiCompose.logic.harmony import note_mapping as nm
 
 
 @pytest.mark.parametrize(

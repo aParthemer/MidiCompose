@@ -3,12 +3,12 @@ from typing import List, Sequence, Optional, Union
 from icecream import ic
 from mido import MidiTrack, MidiFile
 
-from compositional.logic.harmony.chord import Chord
-from compositional.logic.melody.melody import Melody
-from compositional.logic.rhythm.beat import Beat
-from compositional.logic.rhythm.measure import Measure
-from compositional.logic.rhythm.part import Part
-from compositional.translation.track_builder import TrackBuilder
+from MidiCompose.logic.harmony.chord import Chord
+from MidiCompose.logic.melody.melody import Melody
+from MidiCompose.logic.rhythm.beat import Beat
+from MidiCompose.logic.rhythm.measure import Measure
+from MidiCompose.logic.rhythm.part import Part
+from MidiCompose.translation.track_builder import TrackBuilder
 
 
 class ChordSequence:
