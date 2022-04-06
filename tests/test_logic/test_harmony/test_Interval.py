@@ -1,7 +1,7 @@
 import pytest
 
-from MidiCompose.logic.harmony.note import Note
-from MidiCompose.logic.harmony.interval import Interval
+from compositional.logic.harmony.note import Note
+from compositional.logic.harmony.interval import Interval
 
 def test_constructor_hs():
 

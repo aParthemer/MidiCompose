@@ -1,6 +1,6 @@
 import pytest
 
-from MidiCompose.logic.harmony.note import Note
+from compositional.logic.harmony.note import Note
 
 
 #### INITIALIZATION ####
