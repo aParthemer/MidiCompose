@@ -11,7 +11,7 @@ import bisect
 from icecream import ic
 
 from MidiCompose.logic.harmony.interval import Interval, sequence_to_intervals
-from MidiCompose.logic.harmony.key import KeyFamily, to_key
+from MidiCompose.logic.harmony.key import Key
 from MidiCompose.logic.harmony.note import Note, to_note, HasNotes, sequence_to_notes
 
 
@@ -134,7 +134,7 @@ class BaseFiguredNote(AbstractBaseFiguredNote):
 
 
 class ChromaticFiguredNote(BaseFiguredNote):
-    def __init__(self, note: Note, figure: Sequence[int], index: int = 0):
+    def __init__(self, note: Note | Any, figure: Sequence[int], index: int = 0):
         super().__init__(note=note, figure=figure, index=index)
 
     @property
@@ -153,19 +153,19 @@ class ChromaticFiguredNote(BaseFiguredNote):
 class TonalFiguredNote(BaseFiguredNote):
 
     def __init__(self, note: Note | Any,
-                 key: KeyFamily,
+                 key: Key | Any,
                  figure: Sequence[int],
                  index: int = 0):
-        super(TonalFiguredNote, self).__init__(note=note, figure=figure, index=index)
+        super().__init__(note=note, figure=figure, index=index)
         self.key = key
 
     @property
-    def key(self) -> KeyFamily: return self._key
+    def key(self) -> Key: return self._key
 
     @key.setter
     def key(self, key):
         try:
-            _key = to_key(key)
+            _key = Key(**Key.parse(key))
         except:
             raise
 
@@ -193,12 +193,15 @@ class TonalFiguredNote(BaseFiguredNote):
                [self.key.steps_above(note=self.bass,steps=n - 1) for n in self.figure[1:]]
 
     def __repr__(self):
-        return f"TonalFigure(note={self.note}, key={self.key.family}, figure={self.figure}, index={self.index}, notes={self.notes})"
+        _note = self.note.as_letter()
+        _key = self.key.tonic.as_letter(include_range=False) + " " + self.key.key_name
+        return f"TonalFiguredNote('{_note}', index={self.index}, figure={self.figure[1:]}, key='{_key}', notes={self.notes})"
+
 
 if __name__ == '__main__':
     NOTE = Note("C3")
     FIGURE = [3,5]
-    KEY = KeyFamily("C")
+    KEY = Key("C")
     IDX = 1
 
     bf = BaseFiguredNote(note=NOTE, figure=FIGURE, index=IDX)

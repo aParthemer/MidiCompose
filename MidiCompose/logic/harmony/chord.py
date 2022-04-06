@@ -8,7 +8,7 @@ from icecream import ic
 import MidiCompose.logic.harmony.note
 from MidiCompose.logic.harmony.figure import AbstractBaseFiguredNote, TonalFiguredNote
 from MidiCompose.logic.harmony.interval import Interval, IntervalRange
-from MidiCompose.logic.harmony.key import KeyFamily, to_key
+from MidiCompose.logic.harmony.key import Key
 from MidiCompose.logic.harmony.note import Note, HasNotes, to_note
 from MidiCompose.logic.melody.note_set import NoteSet
 
@@ -34,7 +34,7 @@ class Chord:
 
         _notes = None
         if value:
-            if isinstance(value, (TonalFiguredNote)):
+            if isinstance(value, TonalFiguredNote):
                 _notes = value.notes
             elif isinstance(value, Chord):
                 _notes = value.notes
