@@ -7,8 +7,8 @@ from typing import Set, List, Union, Sequence, Tuple, Any, Optional
 from enum import Enum
 from icecream import ic
 
-from compositional.logic.harmony.interval import Interval
-from compositional.logic.harmony.note import Note, HasNotes, to_note, sequence_to_notes
+from MidiCompose.logic.harmony.interval import Interval
+from MidiCompose.logic.harmony.note import Note, HasNotes, to_note, sequence_to_notes
 
 
 class KeySchema(Enum):

@@ -1,4 +1,4 @@
-from compositional.objects import Scale, Note
+from MidiCompose.objects import Scale, Note
 
 params = [
     (Note("C2"), "MAJOR",

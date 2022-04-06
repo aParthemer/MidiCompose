@@ -3,10 +3,10 @@ from typing import List
 import pytest
 from icecream import ic
 
-from compositional.logic.harmony.interval import Interval
-from compositional.logic.melody import scale
-from compositional.logic.melody.note_set import NoteSet
-from compositional.logic.harmony.note import Note
+from MidiCompose.logic.harmony.interval import Interval
+from MidiCompose.logic.melody import scale
+from MidiCompose.logic.melody.note_set import NoteSet
+from MidiCompose.logic.harmony.note import Note
 
 
 @pytest.mark.parametrize(

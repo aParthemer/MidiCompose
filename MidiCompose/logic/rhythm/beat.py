@@ -4,8 +4,8 @@ import random
 
 import numpy as np
 
-from compositional.logic.rhythm.time_unit import TimeUnit
-from compositional.utilities import temp_seed, ctx_random_seed
+from MidiCompose.logic.rhythm.time_unit import TimeUnit
+from MidiCompose.utilities import temp_seed, ctx_random_seed
 
 
 class BeatIterator:

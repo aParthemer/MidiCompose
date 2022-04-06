@@ -1,6 +1,6 @@
 import pytest
 
-from compositional.objects import Chord,Note
+from MidiCompose.objects import Chord,Note
 
 @pytest.mark.parametrize(
     ["notes","expected_notes","error"],

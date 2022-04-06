@@ -1,6 +1,6 @@
-from compositional.logic.rhythm.beat import Beat
-from compositional.logic.rhythm.measure import Measure
-from compositional.logic.rhythm.part import Part
+from MidiCompose.logic.rhythm.beat import Beat
+from MidiCompose.logic.rhythm.measure import Measure
+from MidiCompose.logic.rhythm.part import Part
 
 #### BEAT ####
 

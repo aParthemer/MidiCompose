@@ -2,13 +2,13 @@ from typing import Optional, Tuple
 
 import mido
 
-from compositional.logic.harmony.note import Note
-from compositional.logic.melody.melody import Melody
-from compositional.logic.rhythm.beat import Beat
-from compositional.logic.rhythm.part import Part
-from compositional.logic.rhythm.measure import Measure
+from MidiCompose.logic.harmony.note import Note
+from MidiCompose.logic.melody.melody import Melody
+from MidiCompose.logic.rhythm.beat import Beat
+from MidiCompose.logic.rhythm.part import Part
+from MidiCompose.logic.rhythm.measure import Measure
 
-from compositional.translation.track_builder import TrackBuilder
+from MidiCompose.translation.track_builder import TrackBuilder
 
 from rendering.sf2_objects import GmPercussionRack, GmInstrumentRack
 

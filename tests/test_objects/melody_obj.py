@@ -1,10 +1,10 @@
 from icecream import ic as ice
 
-from compositional.logic.harmony.note import Note
+from MidiCompose.logic.harmony.note import Note
 
-from compositional.logic.melody.melody import Melody
-from compositional.logic.melody.note_set import NoteSet
-from compositional.logic.melody import scale
+from MidiCompose.logic.melody.melody import Melody
+from MidiCompose.logic.melody.note_set import NoteSet
+from MidiCompose.logic.melody import scale
 
 #### MELODY-LIKE OBJECTS ####
 

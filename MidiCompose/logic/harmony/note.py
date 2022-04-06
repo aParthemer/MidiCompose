@@ -6,8 +6,8 @@ from typing import Union, Optional, List, Sequence, Set, Any
 from icecream import ic
 from typing_extensions import runtime_checkable, Protocol
 
-from compositional.logic.harmony import note_mapping as nm
-from compositional.utilities import temp_seed, ctx_random_seed
+from MidiCompose.logic.harmony import note_mapping as nm
+from MidiCompose.utilities import temp_seed, ctx_random_seed
 
 
 class Note:

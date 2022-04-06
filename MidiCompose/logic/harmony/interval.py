@@ -3,8 +3,8 @@ from typing import Union, Optional, List, Sequence, Tuple
 
 from icecream import ic
 
-from compositional.logic.harmony import interval_mapping as imap
-from compositional.logic.harmony.note import Note
+from MidiCompose.logic.harmony import interval_mapping as imap
+from MidiCompose.logic.harmony.note import Note
 
 
 class Interval:

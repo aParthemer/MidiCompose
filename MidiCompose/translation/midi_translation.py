@@ -3,10 +3,10 @@ from typing import Collection, Union, List, Optional, Sequence
 import numpy as np
 from mido import MidiFile, MidiTrack, Message
 
-from compositional.logic.harmony.note import Note
-from compositional.logic.melody.melody import Melody
-from compositional.logic.rhythm.part import Part
-from compositional.translation import state_translation as st
+from MidiCompose.logic.harmony.note import Note
+from MidiCompose.logic.melody.melody import Melody
+from MidiCompose.logic.rhythm.part import Part
+from MidiCompose.translation import state_translation as st
 
 #### OBJECTS ####
 
