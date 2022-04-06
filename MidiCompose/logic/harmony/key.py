@@ -44,6 +44,25 @@ class KeySchema(Enum):
                 e = f"Invalid `KeySchema` string representation. Possible inputs are: {[v.name for v in cls]}"
                 raise ValueError(e)
 
+    @staticmethod
+    def all_diatonic(exclude: KeySchema | Sequence[KeySchema | Any] = None) -> List[KeySchema]:
+        if exclude is not None:
+            if isinstance(exclude,KeySchema):
+                _exclude = [exclude]
+            else:
+                try:
+                    _exclude = [KeySchema.parse(ks) for ks in exclude]
+                except:
+                    raise
+        else:
+            _exclude = []
+
+        diatonic = [KeySchema.MAJOR,KeySchema.DORIAN,KeySchema.PHRYGIAN,
+                    KeySchema.LYDIAN,KeySchema.MIXOLYDIAN,KeySchema.AEOLIAN,
+                    KeySchema.LOCRIAN]
+
+        return [ks for ks in diatonic if ks not in _exclude]
+
 
 class Key:
 

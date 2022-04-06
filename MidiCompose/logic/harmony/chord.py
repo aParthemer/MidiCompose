@@ -34,7 +34,7 @@ class Chord:
 
         _notes = None
         if value:
-            if isinstance(value, (TonalFiguredNote)):
+            if isinstance(value, TonalFiguredNote):
                 _notes = value.notes
             elif isinstance(value, Chord):
                 _notes = value.notes

@@ -40,7 +40,6 @@ def test_constructor(args, expected):
         (Key("D MIXOLYDIAN"),2,[Key(t + " MIXOLYDIAN") for t in "A,E,G,C".split(",")],None),
         (Key("F MAJOR"),7,None,ValueError)
     ]
-
 )
 def test_get_neighbors(key,depth,expected_keys,error):
     if error is not None:

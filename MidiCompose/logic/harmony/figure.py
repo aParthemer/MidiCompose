@@ -134,7 +134,7 @@ class BaseFiguredNote(AbstractBaseFiguredNote):
 
 
 class ChromaticFiguredNote(BaseFiguredNote):
-    def __init__(self, note: Note, figure: Sequence[int], index: int = 0):
+    def __init__(self, note: Note | Any, figure: Sequence[int], index: int = 0):
         super().__init__(note=note, figure=figure, index=index)
 
     @property
@@ -153,10 +153,10 @@ class ChromaticFiguredNote(BaseFiguredNote):
 class TonalFiguredNote(BaseFiguredNote):
 
     def __init__(self, note: Note | Any,
-                 key: Key,
+                 key: Key | Any,
                  figure: Sequence[int],
                  index: int = 0):
-        super(TonalFiguredNote, self).__init__(note=note, figure=figure, index=index)
+        super().__init__(note=note, figure=figure, index=index)
         self.key = key
 
     @property
@@ -193,7 +193,10 @@ class TonalFiguredNote(BaseFiguredNote):
                [self.key.steps_above(note=self.bass,steps=n - 1) for n in self.figure[1:]]
 
     def __repr__(self):
-        return f"TonalFigure(note={self.note}, key={self.key.tonic}, figure={self.figure}, index={self.index}, notes={self.notes})"
+        _note = self.note.as_letter()
+        _key = self.key.tonic.as_letter(include_range=False) + " " + self.key.key_name
+        return f"TonalFiguredNote('{_note}', index={self.index}, figure={self.figure[1:]}, key='{_key}', notes={self.notes})"
+
 
 if __name__ == '__main__':
     NOTE = Note("C3")
