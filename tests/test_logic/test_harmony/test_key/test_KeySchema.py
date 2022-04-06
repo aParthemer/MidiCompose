@@ -1,5 +1,5 @@
 import pytest
-from MidiCompose.logic.harmony.key import KeySchema
+from compositional.logic.harmony.key import KeySchema
 
 @pytest.mark.parametrize(
     argnames=["value","expected"],

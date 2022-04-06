@@ -4,8 +4,8 @@ from typing import Optional
 import numpy as np
 import pytest
 
-from MidiCompose.logic.harmony.note import Note
-from MidiCompose.logic.melody.melody import Melody
+from compositional.logic.harmony.note import Note
+from compositional.logic.melody.melody import Melody
 
 from tests.test_objects import melody_obj as mo
 

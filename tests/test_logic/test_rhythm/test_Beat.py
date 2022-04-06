@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from MidiCompose.logic.rhythm.time_unit import TimeUnit
-from MidiCompose.logic.rhythm.beat import Beat
+from compositional.logic.rhythm.time_unit import TimeUnit
+from compositional.logic.rhythm.beat import Beat
 
 #### PROPERTIES ####
 def test_constructor():

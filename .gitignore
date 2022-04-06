@@ -1,1 +1,7 @@
-rendering/*
+./rendering/
+./.ipynb_checkpoints/
+./.pytest_cache/
+./notebooks/
+./midifiles/
+
+

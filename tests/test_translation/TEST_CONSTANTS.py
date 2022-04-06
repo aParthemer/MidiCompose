@@ -5,14 +5,14 @@ import numpy as np
 import pytest
 from icecream import ic
 
-from MidiCompose.logic.rhythm.measure import Measure
-from MidiCompose.logic.rhythm.beat import Beat
-from MidiCompose.logic.rhythm.part import Part
+from compositional.logic.rhythm.measure import Measure
+from compositional.logic.rhythm.beat import Beat
+from compositional.logic.rhythm.part import Part
 
-from MidiCompose.logic.harmony.note import Note
+from compositional.logic.harmony.note import Note
 
-from MidiCompose.logic.melody.note_set import NoteSet
-from MidiCompose.logic.melody import scale
+from compositional.logic.melody.note_set import NoteSet
+from compositional.logic.melody import scale
 
 
 @dataclass
