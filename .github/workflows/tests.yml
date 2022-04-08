@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
