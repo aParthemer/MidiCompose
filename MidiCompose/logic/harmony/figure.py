@@ -205,12 +205,11 @@ if __name__ == '__main__':
     IDX = 1
 
     bf = BaseFiguredNote(note=NOTE, figure=FIGURE, index=IDX)
-    print(bf)
+
 
     cf = ChromaticFiguredNote(note=NOTE, figure=FIGURE, index=IDX)
-    print(cf)
+
 
     tf = TonalFiguredNote(note=NOTE, figure=FIGURE, index=IDX, key=KEY)
-    print(tf)
 
-    print(cf[1],tf[1:])
+
