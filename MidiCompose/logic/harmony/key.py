@@ -3,13 +3,14 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import dataclass, field, Field
 from itertools import cycle
+import random
 from typing import Set, List, Union, Sequence, Tuple, Any, Optional
 from enum import Enum
 from icecream import ic
 
 from MidiCompose.logic.harmony.interval import Interval
 from MidiCompose.logic.harmony.note import Note, HasNotes, to_note, sequence_to_notes
-
+from MidiCompose.utilities import ctx_random_seed
 
 class KeySchema(Enum):
     IONIAN = MAJOR = (2, 2, 1, 2, 2, 2)
@@ -240,6 +241,39 @@ class Key:
         _note = Note(_note.value % 12)
 
         return self.notes.index(_note)
+
+    def get_nearest_member(self,
+                           note: Note | Any,
+                           bias: str = "down",
+                           random_seed: int = None) -> Note:
+        """
+        Given `note`, get the nearest note in current Key.
+
+        :param random_seed:
+        :param note:
+        :param bias: ["up","down","random"]
+        """
+        if note in self:
+            return note
+
+        if bias.upper() == "RANDOM":
+            with ctx_random_seed(random_seed):
+                bias = random.choice(["down","up"])
+
+        if bias.upper() == "DOWN":
+            while note not in self:
+                note -= 1
+        elif bias.upper() == "UP":
+            while note not in self:
+                note += 1
+        else:
+            raise ValueError("`bias` must be one of: ['UP','DOWN','RANDOM']")
+
+        return note
+
+
+
+
 
     def next_note(self,
                   from_note: Union[Note, int, str],

@@ -80,4 +80,17 @@ def test_le_ge(item, comparison, less_or_equal, greater_or_equal):
     assert (item <= comparison) is less_or_equal
     assert (item >= comparison) is greater_or_equal
 
+def test_int():
+    n = Note(60)
+    assert int(n) == 60
 
+def test_sub():
+    n = Note(60)
+    n2 = Note(50)
+
+    assert n - 10 == n2
+    assert n - n2 == Note(10)
+
+
+def test_floordiv():
+    pass

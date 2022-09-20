@@ -106,3 +106,15 @@ def test_all_keys_with(kwargs,expected):
     assert all([k in expected for k in keys_with])
     assert all([k in keys_with for k in expected])
 
+@pytest.mark.parametrize(
+    ["key","note","bias","expected"],
+    [
+        (Key("C"),Note("Db2"),"up",Note("D2")),
+        (Key("D"),Note("F#2"),"random",Note("F#2")),
+        (Key("Eb"),Note("Db2"),"down",Note("C2"))
+    ]
+)
+def test_get_nearest_member(key,note,bias,expected):
+    assert key.get_nearest_member(note,bias) == expected
+
+0

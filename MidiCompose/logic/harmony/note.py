@@ -300,12 +300,14 @@ class Note:
             raise ValueError(msg)
 
     def __sub__(self, other):
-        if type(other) == int:
-            value = self.value - other
-        else:
-            value = self.value + other.value
+        return Note(int(self) - int(other))
 
-        return Note(value)
+    def __floordiv__(self, other):
+        other = int(other)
+        return self.value // other
+
+    def __int__(self):
+        return self.value
 
     def __repr__(self):
         r = f"Note({self.as_letter()})"
