@@ -60,7 +60,7 @@ def test_mul():
 
 def test_set_state():
     b = Beat([1,2,1,2])
-    print(b)
+
     expected_st = np.array([-3,4,1,2,1,2])
 
     assert_array_equal(b.state,expected_st)
@@ -68,7 +68,6 @@ def test_set_state():
 
     # alter figure
     b.set_state([0,1,2,2,1])
-    print(b)
 
     expected_st = np.array([-3, 5, 0, 1, 2, 2, 1])
 
